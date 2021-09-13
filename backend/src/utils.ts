@@ -1,0 +1,60 @@
+import {FastifyRequest} from "fastify";
+import Busboy from "busboy";
+import {IncomingMessage} from "http";
+
+export function requireEnv(name: string): string {
+    const value = process.env[name];
+    if (value === undefined) throw new Error(`Env variable "${name}" not set`);
+    return value;
+}
+
+export interface File {
+    filename: string;
+    data: Buffer;
+}
+
+export interface MultipartData {
+    files: Partial<Record<string, File>>;
+    fields: Partial<Record<string, unknown>>;
+}
+
+export function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        const chunks: Array<any> = [];
+        stream.on('data', (chunk) => {
+            chunks.push(chunk);
+        });
+        stream.on('error', (error) => {
+            reject(error);
+        });
+        stream.on('end', () => {
+            resolve(Buffer.concat(chunks));
+        });
+    })
+}
+
+export function parseMultipart(request: FastifyRequest, payload: IncomingMessage): Promise<MultipartData> {
+    return new Promise<MultipartData>((resolve) => {
+        const busboy = new Busboy({
+            headers: request.headers,
+        });
+        const files: Record<string, File> = {};
+        const fields: Record<string, unknown> = {};
+        busboy.on('file', async (fieldname, stream, filename) => {
+            files[fieldname] = {
+                data: await streamToBuffer(stream),
+                filename,
+            };
+        });
+        busboy.on('field', (fieldname, value: unknown) => {
+            fields[fieldname] = value;
+        })
+        busboy.on('finish', () => {
+            resolve({
+                files,
+                fields,
+            });
+        });
+        payload.pipe(busboy);
+    });
+}

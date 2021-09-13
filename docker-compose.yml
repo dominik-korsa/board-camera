@@ -1,0 +1,21 @@
+version: "3.7"
+services:
+  backend:
+    build: backend
+    environment:
+      - PORT=80
+    ports:
+      - "5000:80"
+    volumes:
+      - ${STORAGE_LOCATION}/images:/data/images
+  mongodb:
+    image: mongo
+    volumes:
+      - ${STORAGE_LOCATION}/db:/data/db
+    ports:
+      - "5001:27017"
+  transformer:
+    build: transformer
+    ports:
+      - "5002:80"
+    restart: "no"
