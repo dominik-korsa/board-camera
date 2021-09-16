@@ -7,12 +7,46 @@ import { MultipartData } from "../utils";
 import analyseImage from "../lib/analyse";
 import {requireAuthentication} from "../guards";
 import {config} from "../config";
+import {Static, Type} from '@sinclair/typebox';
 
 export default function registerFolders(server: FastifyInstance, dbManager: DatabaseManager) {
-    // server.post('/api/folders/create', async (request, reply) => {
-    //    const user = await requireAuthentication(request, dbManager, true);
-    //
-    // });
+    const createFolderBodySchema = Type.Object({
+       name: Type.String(),
+    });
+    type CreateFolderBody = Static<typeof createFolderBodySchema>;
+    const createFolderReplySchema = Type.Object({
+        id: Type.String(),
+        shortId: Type.String(),
+    });
+    type CreateFolderReply = Static<typeof createFolderReplySchema>;
+    server.post<{
+        Body: CreateFolderBody,
+        Reply: CreateFolderReply,
+    }>('/api/create-root-folder', {
+        schema: {
+            body: createFolderBodySchema,
+            response: {
+                200: createFolderReplySchema
+            }
+        }
+    }, async (request) => {
+        const user = await requireAuthentication(request, dbManager, true);
+        let shortId: string;
+        do {
+            shortId = nanoid(10);
+        } while ((await dbManager.foldersCollection.findOne({ shortId })) !== null)
+        const {insertedId} = await dbManager.foldersCollection.insertOne({
+            parentFolder: null,
+            owner: user._id,
+            rules: [],
+            shortId,
+            name: request.body.name.trim(),
+        });
+        return {
+            id: insertedId.toHexString(),
+            shortId,
+        }
+    });
 
     server.post('/api/folders/:folderId/upload', async (request, reply) => {
         await requireAuthentication(request, dbManager, true);

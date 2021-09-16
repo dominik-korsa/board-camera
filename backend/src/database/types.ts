@@ -35,3 +35,25 @@ export interface DbApiToken {
     tokenHash: string;
     ownerId: ObjectId;
 }
+
+export interface DbFolderRule {
+    users: ObjectId[];
+    role: 'viewer' | 'uploader' | 'editor' | 'admin';
+}
+
+export interface DbFolderCommon {
+    rules: DbFolderRule[];
+    name: string;
+    shortId: string;
+}
+
+export interface DbRootFolder extends DbFolderCommon {
+    owner: ObjectId;
+    parentFolder: null;
+}
+
+export interface DbChildFolder extends DbFolderCommon {
+    parentFolder: ObjectId;
+}
+
+export type DbFolder = DbRootFolder | DbChildFolder;
