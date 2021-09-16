@@ -40,8 +40,8 @@ export function parseMultipart(request: FastifyRequest, payload: IncomingMessage
         });
         const files: Record<string, File> = {};
         const fields: Record<string, unknown> = {};
-        busboy.on('file', async (fieldname, stream, filename) => {
-            files[fieldname] = {
+        busboy.on('file', async (fieldName, stream, filename) => {
+            files[fieldName] = {
                 data: await streamToBuffer(stream),
                 filename,
             };

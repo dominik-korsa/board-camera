@@ -1,14 +1,16 @@
 import { FastifyInstance } from "fastify";
-import config from "../config";
 import { nanoid } from 'nanoid';
 import path from "path";
 import fse from "fs-extra";
 import { DatabaseManager } from "../database/database";
 import { MultipartData } from "../utils";
 import analyseImage from "../lib/analyse";
+import {requireAuthentication} from "../guards";
+import {config} from "../config";
 
 export default function registerUpload(server: FastifyInstance, dbManager: DatabaseManager) {
     server.post('/api/upload', async (request, reply) => {
+        await requireAuthentication(request, dbManager);
         const data = request.body as MultipartData;
         // TODO: Perform verification
         const file = data.files.file;

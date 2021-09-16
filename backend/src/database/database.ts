@@ -1,6 +1,6 @@
 import { Collection, Db, MongoClient } from "mongodb";
 import {DbImage, DbUser} from "./types";
-import config from "../config";
+import {config} from "../config";
 
 export class DatabaseManager {
     private db: Db;
