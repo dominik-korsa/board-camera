@@ -30,6 +30,7 @@ async function main() {
     });
 
     console.log('DB connected');
+    await dbManager.updateAllFolderCaches();
     await registerAuth(server, dbManager);
     registerFolders(server, dbManager);
     registerAPITokens(server, dbManager);

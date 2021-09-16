@@ -1,5 +1,5 @@
 import {FastifyRequest} from "fastify";
-import {DatabaseManager} from "./database/database";
+import {DbManager} from "./database/database";
 import {DbApiToken, DbUser} from "./database/types";
 import {ObjectId} from "mongodb";
 import bcrypt from 'bcrypt';
@@ -8,7 +8,7 @@ export class InvalidApiTokenError extends Error {
     constructor() { super('InvalidApiTokenError'); }
 }
 
-export async function getAndVerifyApiToken(rawToken: string, dbManager: DatabaseManager): Promise<DbApiToken> {
+export async function getAndVerifyApiToken(rawToken: string, dbManager: DbManager): Promise<DbApiToken> {
     let token = rawToken.trim();
     const parts = rawToken.split(':');
     if (parts.length !== 2) throw new InvalidApiTokenError();
@@ -20,7 +20,7 @@ export async function getAndVerifyApiToken(rawToken: string, dbManager: Database
     return apiToken;
 }
 
-export async function requireAuthentication(request: FastifyRequest, dbManager: DatabaseManager, allowToken: boolean): Promise<DbUser> {
+export async function requireAuthentication(request: FastifyRequest, dbManager: DbManager, allowToken: boolean): Promise<DbUser> {
     let rawToken = request.headers['x-api-token'];
     if (Array.isArray(rawToken)) rawToken = rawToken[0];
     if (rawToken) {

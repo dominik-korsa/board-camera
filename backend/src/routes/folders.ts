@@ -2,14 +2,16 @@ import { FastifyInstance } from "fastify";
 import { nanoid } from 'nanoid';
 import path from "path";
 import fse from "fs-extra";
-import { DatabaseManager } from "../database/database";
+import { DbManager } from "../database/database";
 import { MultipartData } from "../utils";
 import analyseImage from "../lib/analyse";
 import {requireAuthentication} from "../guards";
 import {config} from "../config";
 import {Static, Type} from '@sinclair/typebox';
+import {WithoutId} from "mongodb";
+import {DbRootFolder} from "../database/types";
 
-export default function registerFolders(server: FastifyInstance, dbManager: DatabaseManager) {
+export default function registerFolders(server: FastifyInstance, dbManager: DbManager) {
     const createFolderBodySchema = Type.Object({
        name: Type.String(),
     });
@@ -35,13 +37,24 @@ export default function registerFolders(server: FastifyInstance, dbManager: Data
         do {
             shortId = nanoid(10);
         } while ((await dbManager.foldersCollection.findOne({ shortId })) !== null)
-        const {insertedId} = await dbManager.foldersCollection.insertOne({
-            parentFolder: null,
-            owner: user._id,
-            rules: [],
-            shortId,
-            name: request.body.name.trim(),
+        const insertedId = await dbManager.withSession(async () => {
+            const newFolder: WithoutId<DbRootFolder> = {
+                parentFolder: null,
+                owner: user._id,
+                rules: [],
+                shortId,
+                name: request.body.name.trim(),
+                cache: {
+                    userRecursiveRole: {},
+                    shareRootFor: [],
+                }
+            };
+            const result = await dbManager.foldersCollection.insertOne(newFolder);
+            const folder: DbRootFolder = {...newFolder, _id: result.insertedId};
+            await dbManager.updateFolderCache(folder);
+            return result.insertedId;
         });
+        if (insertedId === undefined) throw new Error('insertedId is undefined');
         return {
             id: insertedId.toHexString(),
             shortId,

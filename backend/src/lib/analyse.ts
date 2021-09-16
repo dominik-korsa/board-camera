@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import FormData from "form-data";
 import got from "got";
-import { DatabaseManager } from "../database/database";
+import { DbManager } from "../database/database";
 import * as fs from "fs";
 import { DbImageBoard } from "../database/types";
 
@@ -16,7 +16,7 @@ type AnalyseImageResponse = Record<number, AnalyseImageResult>
 
 export default async function analyseImage(
     id: ObjectId,
-    dbManager: DatabaseManager,
+    dbManager: DbManager,
     markers: number[][],
 ) {
     const image = await dbManager.imagesCollection.findOne(id);

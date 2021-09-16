@@ -36,15 +36,24 @@ export interface DbApiToken {
     ownerId: ObjectId;
 }
 
+export type Role = 'viewer' | 'uploader' | 'editor' | 'admin';
+export type RecursiveRole = Role | 'owner';
 export interface DbFolderRule {
     users: ObjectId[];
-    role: 'viewer' | 'uploader' | 'editor' | 'admin';
+    role: Role;
+}
+
+export interface DbFolderCache {
+    shareRootFor: ObjectId[];
+    userRecursiveRole: Record<string, RecursiveRole>;
 }
 
 export interface DbFolderCommon {
+    _id: ObjectId,
     rules: DbFolderRule[];
     name: string;
     shortId: string;
+    cache: DbFolderCache;
 }
 
 export interface DbRootFolder extends DbFolderCommon {

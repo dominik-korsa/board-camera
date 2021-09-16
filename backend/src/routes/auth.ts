@@ -1,9 +1,9 @@
 import { FastifyInstance } from "fastify";
-import { DatabaseManager } from "../database/database";
+import { DbManager } from "../database/database";
 import {GenerateAuthUrlOpts, OAuth2Client} from "google-auth-library";
 import {config, getGoogleKeys} from "../config";
 
-export default async function registerAuth(server: FastifyInstance, dbManager: DatabaseManager) {
+export default async function registerAuth(server: FastifyInstance, dbManager: DbManager) {
     const keys = await getGoogleKeys();
     const client = new OAuth2Client(
         keys.web.client_id,
