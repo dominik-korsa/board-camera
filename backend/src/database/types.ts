@@ -22,3 +22,9 @@ export interface DbImage {
     uploadedOnDateTime: string;
     boards: DbImageBoard[] | null;
 }
+
+export interface DbUser {
+    _id: ObjectId;
+    googleId: string;
+    googleRefreshToken: string;
+}

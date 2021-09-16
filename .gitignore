@@ -1,7 +1,10 @@
-.env
 *.iml
 .idea
 .vscode
 logs
 *.log
 npm-debug.log*
+
+.env
+session-key
+google-keys.json
