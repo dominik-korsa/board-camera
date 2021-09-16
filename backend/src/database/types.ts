@@ -28,3 +28,10 @@ export interface DbUser {
     googleId: string;
     googleRefreshToken: string;
 }
+
+export interface DbApiToken {
+    _id: ObjectId,
+    tokenId: string;
+    tokenHash: string;
+    ownerId: ObjectId;
+}

@@ -8,9 +8,14 @@ import analyseImage from "../lib/analyse";
 import {requireAuthentication} from "../guards";
 import {config} from "../config";
 
-export default function registerUpload(server: FastifyInstance, dbManager: DatabaseManager) {
-    server.post('/api/upload', async (request, reply) => {
-        await requireAuthentication(request, dbManager);
+export default function registerFolders(server: FastifyInstance, dbManager: DatabaseManager) {
+    // server.post('/api/folders/create', async (request, reply) => {
+    //    const user = await requireAuthentication(request, dbManager, true);
+    //
+    // });
+
+    server.post('/api/folders/:folderId/upload', async (request, reply) => {
+        await requireAuthentication(request, dbManager, true);
         const data = request.body as MultipartData;
         // TODO: Perform verification
         const file = data.files.file;
