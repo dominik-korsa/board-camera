@@ -206,4 +206,30 @@ export default function registerFolders(server: FastifyInstance, dbManager: DbMa
       },
     };
   });
+
+  const renameFolderBodySchema = Type.Object({
+    name: Type.String(),
+  });
+  type RenameFolderBody = Static<typeof renameFolderBodySchema>;
+  server.post<{
+    Params: { folderShortId: string },
+    Body: RenameFolderBody,
+  }>('/api/folders/:folderShortId/rename', {
+    schema: {
+      body: renameFolderBodySchema,
+    },
+  }, async (request) => {
+    const user = await requireAuthentication(request, dbManager, true);
+    const folder = await dbManager.foldersCollection.findOne({
+      shortId: request.params.folderShortId,
+    });
+    if (!folder) throw server.httpErrors.notFound('Folder not found');
+    if (!hasRole(folder, user._id, 'editor')) throw server.httpErrors.forbidden();
+    await dbManager.foldersCollection.updateOne({ _id: folder._id }, {
+      $set: {
+        name: request.body.name.trim(),
+      },
+    });
+    return {};
+  });
 }
