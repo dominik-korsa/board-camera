@@ -1,6 +1,7 @@
 import {ClientSession, Collection, Db, MongoClient} from "mongodb";
 import {DbApiToken, DbFolder, DbFolderCache, DbImage, DbUser, RecursiveRole} from "./types";
 import {config} from "../config";
+import {compareRoles} from "../rules";
 
 export class DbManager {
     private client: MongoClient;
@@ -30,15 +31,6 @@ export class DbManager {
         await this.foldersCollection.createIndex({'cache.shareRootFor': 1});
     }
 
-    private static rolePreference: Record<RecursiveRole | 'none', number> = {
-        none: 0,
-        viewer: 1,
-        contributor: 2,
-        editor: 3,
-        admin: 4,
-        owner: 5,
-    }
-
     async updateFolderCache(folder: DbFolder): Promise<void> {
         if (folder.parentFolder === null) return this.updateFolderCacheLoop(folder, {});
         const parent = await this.foldersCollection.findOne(folder.parentFolder);
@@ -58,7 +50,7 @@ export class DbManager {
         folder.rules.forEach((rule) => {
             const prevRole = newCache.userRecursiveRole[rule.userId.toHexString()];
             if (prevRole === undefined) newCache.shareRootFor.push(rule.userId);
-            if (DbManager.rolePreference[rule.role] > DbManager.rolePreference[prevRole ?? 'none']) {
+            if (compareRoles(rule.role, prevRole) > 0) {
                 newCache.userRecursiveRole[rule.userId.toHexString()] = rule.role;
             }
         });

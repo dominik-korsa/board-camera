@@ -17,10 +17,14 @@ export interface DbImageBoard {
 
 export interface DbImage {
     _id: ObjectId;
+    shortId: string;
     path: string;
     capturedOnDate: string;
     uploadedOnDateTime: string;
     boards: DbImageBoard[] | null;
+    uploaderId: ObjectId;
+    folderId: ObjectId;
+    mimeType: string;
 }
 
 export interface DbUser {

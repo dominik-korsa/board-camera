@@ -11,6 +11,7 @@ export function requireEnv(name: string): string {
 export interface File {
     filename: string;
     data: Buffer;
+    mimeType: string;
 }
 
 export interface MultipartData {
@@ -40,10 +41,11 @@ export function parseMultipart(request: FastifyRequest, payload: IncomingMessage
         });
         const files: Record<string, File> = {};
         const fields: Record<string, unknown> = {};
-        busboy.on('file', async (fieldName, stream, filename) => {
+        busboy.on('file', async (fieldName, stream, filename, encoding, mimeType) => {
             files[fieldName] = {
                 data: await streamToBuffer(stream),
                 filename,
+                mimeType,
             };
         });
         busboy.on('field', (fieldname, value: unknown) => {
