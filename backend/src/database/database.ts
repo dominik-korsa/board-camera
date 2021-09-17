@@ -25,7 +25,7 @@ export class DbManager {
         await this.apiTokensCollection.createIndex({tokenId: 1,}, {unique: true,});
 
         await this.foldersCollection.createIndex({shortId: 1,}, {unique: true});
-        await this.foldersCollection.createIndex({owner: 1,});
+        await this.foldersCollection.createIndex({ownerId: 1,});
         await this.foldersCollection.createIndex({parentFolder: 1, });
         await this.foldersCollection.createIndex({'cache.shareRootFor': 1});
     }
@@ -33,7 +33,7 @@ export class DbManager {
     private static rolePreference: Record<RecursiveRole | 'none', number> = {
         none: 0,
         viewer: 1,
-        uploader: 2,
+        contributor: 2,
         editor: 3,
         admin: 4,
         owner: 5,
@@ -54,14 +54,14 @@ export class DbManager {
         Object.entries(parentUserRecursiveRole).forEach(([key, value]) => {
            newCache.userRecursiveRole[key] = value;
         });
-        if (folder.parentFolder === null) newCache.userRecursiveRole[folder.owner.toHexString()] = 'owner';
-        folder.rules.forEach((rule) => rule.users.forEach((userId) => {
-            const prevRole = newCache.userRecursiveRole[userId.toHexString()];
-            if (prevRole === undefined) newCache.shareRootFor.push(userId);
+        if (folder.parentFolder === null) newCache.userRecursiveRole[folder.ownerId.toHexString()] = 'owner';
+        folder.rules.forEach((rule) => {
+            const prevRole = newCache.userRecursiveRole[rule.userId.toHexString()];
+            if (prevRole === undefined) newCache.shareRootFor.push(rule.userId);
             if (DbManager.rolePreference[rule.role] > DbManager.rolePreference[prevRole ?? 'none']) {
-                newCache.userRecursiveRole[userId.toHexString()] = rule.role;
+                newCache.userRecursiveRole[rule.userId.toHexString()] = rule.role;
             }
-        }));
+        });
         await this.foldersCollection.updateOne({
             _id: folder._id,
         }, {

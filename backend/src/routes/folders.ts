@@ -40,7 +40,7 @@ export default function registerFolders(server: FastifyInstance, dbManager: DbMa
         const insertedId = await dbManager.withSession(async () => {
             const newFolder: WithoutId<DbRootFolder> = {
                 parentFolder: null,
-                owner: user._id,
+                ownerId: user._id,
                 rules: [],
                 shortId,
                 name: request.body.name.trim(),
