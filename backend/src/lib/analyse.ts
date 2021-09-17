@@ -1,9 +1,8 @@
-import { ObjectId } from "mongodb";
 import FormData from "form-data";
 import got from "got";
-import { DbManager } from "../database/database";
+import {DbManager} from "../database/database";
 import * as fs from "fs";
-import { DbImageBoard } from "../database/types";
+import {DbImageBoard} from "../database/types";
 
 interface AnalyseImageResult {
     points: [number, number][];
@@ -15,20 +14,18 @@ interface AnalyseImageResult {
 type AnalyseImageResponse = Record<number, AnalyseImageResult>
 
 export default async function analyseImage(
-    id: ObjectId,
+    path: string,
     dbManager: DbManager,
     markers: number[][],
-) {
-    const image = await dbManager.imagesCollection.findOne(id);
-    if (!image) throw new Error('Image not found');
+): Promise<DbImageBoard[]> {
     const form = new FormData();
-    form.append('file', fs.createReadStream(image.path));
+    form.append('file', fs.createReadStream(path));
     form.append('markers', JSON.stringify(markers));
     const response = await got.post<AnalyseImageResponse>('http://transformer/analyse', {
         body: form,
         responseType: 'json',
     });
-    const boards: DbImageBoard[] = Object.values(response.body).map((value) => {
+    return Object.values(response.body).map((value) => {
         const points = value.points.map(([x, y]) => ({x, y}))
         return ({
             topLeft: points[0],
@@ -40,11 +37,4 @@ export default async function analyseImage(
             ratio: value.width / value.height,
         });
     });
-    console.log(boards);
-    await dbManager.imagesCollection.updateOne({_id: id,}, {
-        $set: {
-            boards,
-        }
-    })
-    response.body
 }

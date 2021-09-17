@@ -9,6 +9,7 @@ import fsPromises from "fs/promises";
 import registerAuth from "./routes/auth";
 import {config} from "./config";
 import {registerAPITokens} from "./routes/api-tokens";
+import {registerImageUpload} from "./routes/image-upload";
 
 async function main() {
     const dbManager = await connectDb();
@@ -34,6 +35,7 @@ async function main() {
     await registerAuth(server, dbManager);
     registerFolders(server, dbManager);
     registerAPITokens(server, dbManager);
+    registerImageUpload(server, dbManager);
     server.get('/', (request, reply) => {
         reply.send('Witaj!')
     })

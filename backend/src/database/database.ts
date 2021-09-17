@@ -21,6 +21,11 @@ export class DbManager {
     }
 
     async init() {
+        await this.imagesCollection.createIndex({
+            folderId: 1,
+            shortId: 1,
+        }, { unique: true, });
+
         await this.usersCollection.createIndex({googleId: 1,}, {unique: true,});
 
         await this.apiTokensCollection.createIndex({tokenId: 1,}, {unique: true,});
