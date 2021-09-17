@@ -5,8 +5,14 @@ import { WithoutId } from 'mongodb';
 import { DbManager } from '../database/database';
 import { requireAuthentication } from '../guards';
 import { DbFolder, DbRootFolder } from '../database/types';
+import { hasRole } from '../rules';
 
-function mapFolder(folder: DbFolder) {
+const folderSchema = Type.Object({
+  shortId: Type.String(),
+  name: Type.String(),
+});
+type Folder = Static<typeof folderSchema>;
+function mapFolder(folder: DbFolder): Folder {
   return {
     name: folder.name,
     shortId: folder.shortId,
@@ -62,10 +68,6 @@ export default function registerFolders(server: FastifyInstance, dbManager: DbMa
     };
   });
 
-  const folderSchema = Type.Object({
-    shortId: Type.String(),
-    name: Type.String(),
-  });
   const listUserFoldersReplySchema = Type.Object({
     ownedFolders: Type.Array(folderSchema),
     sharedFolders: Type.Array(folderSchema),
@@ -93,6 +95,47 @@ export default function registerFolders(server: FastifyInstance, dbManager: DbMa
     return {
       ownedFolders,
       sharedFolders,
+    };
+  });
+
+  const imageSchema = Type.Object({
+    shortId: Type.String(),
+    capturedOnDate: Type.String(),
+  });
+  type Image = Static<typeof imageSchema>;
+  const folderContentsReplySchema = Type.Object({
+    subfolders: Type.Array(folderSchema),
+    images: Type.Array(imageSchema),
+  });
+  type FolderContentsReply = Static<typeof folderContentsReplySchema>;
+  server.get<{
+    Params: { folderShortId: string },
+    Reply: FolderContentsReply,
+  }>('/api/folders/:folderShortId/contents', {
+    schema: {
+      response: {
+        200: folderContentsReplySchema,
+      },
+    },
+  }, async (request) => {
+    const user = await requireAuthentication(request, dbManager, true);
+    const folder = await dbManager.foldersCollection.findOne({
+      shortId: request.params.folderShortId,
+    });
+    if (!folder) throw server.httpErrors.notFound('Folder not found');
+    if (!hasRole(folder, user._id, 'viewer')) throw server.httpErrors.forbidden();
+    const subfolders = await dbManager.foldersCollection.find({
+      parentFolder: folder._id,
+    }).map(mapFolder).toArray();
+    const images = await dbManager.imagesCollection.find({
+      folderId: folder._id,
+    }).map((image): Image => ({
+      shortId: image.shortId,
+      capturedOnDate: image.capturedOnDate,
+    })).toArray();
+    return {
+      subfolders,
+      images,
     };
   });
 }
