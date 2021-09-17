@@ -67,11 +67,11 @@ export interface DbFolderCommon {
 
 export interface DbRootFolder extends DbFolderCommon {
   ownerId: ObjectId;
-  parentFolder: null;
+  parentFolderId: null;
 }
 
 export interface DbChildFolder extends DbFolderCommon {
-  parentFolder: ObjectId;
+  parentFolderId: ObjectId;
 }
 
 export type DbFolder = DbRootFolder | DbChildFolder;

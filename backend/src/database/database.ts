@@ -34,6 +34,7 @@ export class DbManager {
       folderId: 1,
       shortId: 1,
     }, { unique: true });
+    await this.imagesCollection.createIndex({ shortId: 1 });
 
     await this.usersCollection.createIndex({ googleId: 1 }, { unique: true });
 
@@ -41,13 +42,13 @@ export class DbManager {
 
     await this.foldersCollection.createIndex({ shortId: 1 }, { unique: true });
     await this.foldersCollection.createIndex({ ownerId: 1 });
-    await this.foldersCollection.createIndex({ parentFolder: 1 });
+    await this.foldersCollection.createIndex({ parentFolderId: 1 });
     await this.foldersCollection.createIndex({ 'cache.shareRootFor': 1 });
   }
 
   async updateFolderCache(folder: DbFolder): Promise<void> {
-    if (folder.parentFolder === null) return this.updateFolderCacheLoop(folder, {});
-    const parent = await this.foldersCollection.findOne(folder.parentFolder);
+    if (folder.parentFolderId === null) return this.updateFolderCacheLoop(folder, {});
+    const parent = await this.foldersCollection.findOne(folder.parentFolderId);
     if (!parent) throw new Error(`Cannot find parent folder of ${folder.shortId}`);
     return this.updateFolderCacheLoop(folder, parent.cache.userRecursiveRole);
   }
@@ -63,7 +64,7 @@ export class DbManager {
     Object.entries(parentUserRecursiveRole).forEach(([key, value]) => {
       newCache.userRecursiveRole[key] = value;
     });
-    if (folder.parentFolder === null) newCache.userRecursiveRole[folder.ownerId.toHexString()] = 'owner';
+    if (folder.parentFolderId === null) newCache.userRecursiveRole[folder.ownerId.toHexString()] = 'owner';
     folder.rules.forEach((rule) => {
       const prevRole = newCache.userRecursiveRole[rule.userId.toHexString()];
       if (prevRole === undefined) newCache.shareRootFor.push(rule.userId);
@@ -78,7 +79,7 @@ export class DbManager {
     });
     await Promise.all(
       await this.foldersCollection.find({
-        parentFolder: folder._id,
+        parentFolderId: folder._id,
       }).map((childFolder) => this.updateFolderCache(childFolder))
         .toArray(),
     );
@@ -86,7 +87,7 @@ export class DbManager {
 
   async updateAllFolderCaches() {
     await Promise.all(
-      await this.foldersCollection.find({ parentFolder: null })
+      await this.foldersCollection.find({ parentFolderId: null })
         .map((folder) => this.updateFolderCache(folder))
         .toArray(),
     );
