@@ -60,3 +60,11 @@ export function parseMultipart(request: FastifyRequest, payload: IncomingMessage
         payload.pipe(busboy);
     });
 }
+
+export function mapObject<T, R, K extends string>(obj: Record<K, T>, f: (value: T, key: K) => R): Record<K, R> {
+    return Object.fromEntries(
+        Object.entries<T>(obj).map(([key, value]) => {
+            return [key, f(value, key as K)]
+        })
+    ) as Record<K, R>
+}

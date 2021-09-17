@@ -1,6 +1,6 @@
 import {Static, Type} from "@sinclair/typebox";
 import {requireAuthentication} from "../guards";
-import {MultipartData} from "../utils";
+import {mapObject, MultipartData} from "../utils";
 import {hasRole} from "../rules";
 import path from "path";
 import {config} from "../config";
@@ -10,6 +10,7 @@ import analyseImage from "../lib/analyse";
 import {FastifyInstance} from "fastify";
 import {DbManager} from "../database/database";
 import {DbImageBoard} from "../database/types";
+import sharp from 'sharp';
 
 export function registerImageUpload(server: FastifyInstance, dbManager: DbManager) {
     const uploadImageReplySchema = Type.Object({
@@ -44,30 +45,64 @@ export function registerImageUpload(server: FastifyInstance, dbManager: DbManage
         if (folder === null) throw server.httpErrors.notFound(`Folder not found`);
         if (!hasRole(folder, user._id, 'editor')) throw server.httpErrors.forbidden();
 
-        let filePath;
+        let folderPath: string;
         do {
-            filePath = path.join(config.storagePath, `${nanoid(12)}${path.extname(file.filename)}`);
-        } while (await fse.pathExists(filePath))
-        await fse.writeFile(filePath, file.data);
+            folderPath = path.join(config.storagePath, `${nanoid(12)}`);
+        } while (await fse.pathExists(folderPath))
+        await fse.ensureDir(folderPath);
+        const rawPath = path.join(folderPath, `raw${path.extname(file.filename)}`);
+        const fullPath = path.join(folderPath, `full.webp`);
+        const getTransform = (name: string, width: number, height: number) => {
+            const filePath = path.join(folderPath, `${name}.webp`);
+            return {
+                filePath,
+                execute: async () => sharp(file.data)
+                    .rotate()
+                    .resize({
+                        width,
+                        height,
+                        fit: 'outside',
+                        withoutEnlargement: true,
+                    })
+                    .toFile(filePath)
+            }
+        }
+        const transforms: Record<'small' | 'medium' | 'large', ReturnType<typeof getTransform>> = {
+            small: getTransform('small', 426, 240),
+            medium: getTransform('medium', 854, 480),
+            large: getTransform('large', 1920, 1080),
+        }
+
+        let boards: DbImageBoard[] | null = null;
+        await Promise.all([
+            fse.writeFile(rawPath, file.data),
+            async () => {
+                try { boards = await analyseImage(file.data, dbManager, [[0, 1, 2, 3]]); }
+                catch (error) { console.error(error); }
+            },
+            sharp(file.data).rotate().toFile(fullPath),
+            Promise.all(Object.values(transforms).map(x => x.execute())),
+        ]);
+
         let shortId: string;
         do {
             shortId = nanoid(10);
         } while ((await dbManager.imagesCollection.findOne({ shortId })) !== null)
-        let boards: DbImageBoard[] | null = null;
-        try {
-            boards = await analyseImage(filePath, dbManager, [[0, 1, 2, 3]]);
-        } catch (error) {
-            console.error(error);
-        }
         await dbManager.imagesCollection.insertOne({
             shortId,
-            path: filePath,
             boards,
             capturedOnDate: data.fields.capturedOn,
             uploadedOnDateTime: new Date().toISOString(),
             folderId: folder._id,
             uploaderId: user._id,
-            mimeType: file.mimeType,
+            rawFile: {
+               path: rawPath,
+               mimeType: file.mimeType,
+            },
+            compressedFilePaths: {
+                full: fullPath,
+                ...mapObject(transforms, (x) => x.filePath)
+            }
         });
         return {
             shortId,

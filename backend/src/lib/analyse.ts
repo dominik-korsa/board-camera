@@ -1,7 +1,6 @@
 import FormData from "form-data";
 import got from "got";
 import {DbManager} from "../database/database";
-import * as fs from "fs";
 import {DbImageBoard} from "../database/types";
 
 interface AnalyseImageResult {
@@ -14,12 +13,12 @@ interface AnalyseImageResult {
 type AnalyseImageResponse = Record<number, AnalyseImageResult>
 
 export default async function analyseImage(
-    path: string,
+    data: Buffer,
     dbManager: DbManager,
     markers: number[][],
 ): Promise<DbImageBoard[]> {
     const form = new FormData();
-    form.append('file', fs.createReadStream(path));
+    form.append('file', data);
     form.append('markers', JSON.stringify(markers));
     const response = await got.post<AnalyseImageResponse>('http://transformer/analyse', {
         body: form,

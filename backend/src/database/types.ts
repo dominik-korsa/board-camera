@@ -15,16 +15,20 @@ export interface DbImageBoard {
     mmHeight: number;
 }
 
+export type DbCompressedImageSize = 'full' | 'small' | 'medium' | 'large';
 export interface DbImage {
     _id: ObjectId;
     shortId: string;
-    path: string;
+    rawFile: {
+        path: string;
+        mimeType: string;
+    }
+    compressedFilePaths: Record<DbCompressedImageSize, string>;
     capturedOnDate: string;
     uploadedOnDateTime: string;
     boards: DbImageBoard[] | null;
     uploaderId: ObjectId;
     folderId: ObjectId;
-    mimeType: string;
 }
 
 export interface DbUser {
