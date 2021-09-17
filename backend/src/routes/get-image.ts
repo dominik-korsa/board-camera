@@ -12,7 +12,7 @@ type ImageParams = {
 
 export function registerImageDownload(server: FastifyInstance, dbManager: DbManager) {
   const getImage = async (request: FastifyRequest<{ Params: ImageParams }>) => {
-    const user = await requireAuthentication(server, request, dbManager, true);
+    const user = await requireAuthentication(request, dbManager, true);
     const folder = await dbManager.foldersCollection.findOne({
       shortId: request.params.folderShortId,
     });

@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyRequest } from 'fastify';
+import { FastifyRequest } from 'fastify';
 import { ObjectId } from 'mongodb';
 import bcrypt from 'bcrypt';
 import { DbManager } from './database/database';
@@ -24,7 +24,6 @@ export async function getAndVerifyApiToken(
 }
 
 export async function requireAuthentication(
-  server: FastifyInstance,
   request: FastifyRequest,
   dbManager: DbManager,
   allowToken: boolean,
@@ -37,7 +36,7 @@ export async function requireAuthentication(
     try {
       apiToken = await getAndVerifyApiToken(rawToken, dbManager);
     } catch (error) {
-      if (!(error instanceof InvalidApiTokenError)) server.log.error(error);
+      if (!(error instanceof InvalidApiTokenError)) request.server.log.error(error);
       throw request.server.httpErrors.unauthorized('Invalid API token');
     }
     const user = await dbManager.usersCollection.findOne(apiToken.ownerId);

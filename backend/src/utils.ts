@@ -51,8 +51,8 @@ export function parseMultipart(
         mimeType,
       };
     });
-    busboy.on('field', (fieldname, value: unknown) => {
-      fields[fieldname] = value;
+    busboy.on('field', (fieldName, value: unknown) => {
+      fields[fieldName] = value;
     });
     busboy.on('finish', () => {
       resolve({

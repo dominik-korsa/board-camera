@@ -29,7 +29,7 @@ export function registerImageUpload(server: FastifyInstance, dbManager: DbManage
       },
     },
   }, async (request) => {
-    const user = await requireAuthentication(server, request, dbManager, true);
+    const user = await requireAuthentication(request, dbManager, true);
     const data = request.body as MultipartData;
     const { file } = data.files;
     if (!file) throw server.httpErrors.badRequest('Missing "file"');

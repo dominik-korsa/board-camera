@@ -4,7 +4,14 @@ import { Static, Type } from '@sinclair/typebox';
 import { WithoutId } from 'mongodb';
 import { DbManager } from '../database/database';
 import { requireAuthentication } from '../guards';
-import { DbRootFolder } from '../database/types';
+import { DbFolder, DbRootFolder } from '../database/types';
+
+function mapFolder(folder: DbFolder) {
+  return {
+    name: folder.name,
+    shortId: folder.shortId,
+  };
+}
 
 export default function registerFolders(server: FastifyInstance, dbManager: DbManager) {
   const createFolderBodySchema = Type.Object({
@@ -26,7 +33,7 @@ export default function registerFolders(server: FastifyInstance, dbManager: DbMa
       },
     },
   }, async (request) => {
-    const user = await requireAuthentication(server, request, dbManager, true);
+    const user = await requireAuthentication(request, dbManager, true);
     let shortId: string;
     do {
       shortId = nanoid(10);
@@ -52,6 +59,40 @@ export default function registerFolders(server: FastifyInstance, dbManager: DbMa
     if (insertedId === undefined) throw new Error('insertedId is undefined');
     return {
       shortId,
+    };
+  });
+
+  const folderSchema = Type.Object({
+    shortId: Type.String(),
+    name: Type.String(),
+  });
+  const listUserFoldersReplySchema = Type.Object({
+    ownedFolders: Type.Array(folderSchema),
+    sharedFolders: Type.Array(folderSchema),
+  });
+  type ListUserFoldersReply = Static<typeof listUserFoldersReplySchema>;
+  server.get<{
+    Reply: ListUserFoldersReply,
+  }>('/api/list-user-folders', {
+    schema: {
+      response: {
+        200: listUserFoldersReplySchema,
+      },
+    },
+  }, async (request) => {
+    const user = await requireAuthentication(request, dbManager, true);
+    const ownedFolders = await dbManager.foldersCollection.find({
+      parentFolder: null,
+      ownerId: user._id,
+    }).map(mapFolder).toArray();
+    const sharedFolders = await dbManager.foldersCollection.find({
+      cache: {
+        shareRootFor: { $elemMatch: user._id },
+      },
+    }).map(mapFolder).toArray();
+    return {
+      ownedFolders,
+      sharedFolders,
     };
   });
 }

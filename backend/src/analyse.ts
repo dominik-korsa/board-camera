@@ -1,7 +1,7 @@
 import FormData from 'form-data';
 import got from 'got';
-import { DbManager } from '../database/database';
-import { DbImageBoard } from '../database/types';
+import { DbManager } from './database/database';
+import { DbImageBoard } from './database/types';
 
 interface AnalyseImageResult {
   points: [number, number][];

@@ -6,7 +6,7 @@ import { requireAuthentication } from '../guards';
 
 export function registerAPITokens(server: FastifyInstance, dbManager: DbManager) {
   server.post('/api/api-tokens/generate', async (request) => {
-    const user = await requireAuthentication(server, request, dbManager, false);
+    const user = await requireAuthentication(request, dbManager, false);
     try {
       let tokenId;
       do {
