@@ -35,6 +35,7 @@ export interface DbUser {
   _id: ObjectId;
   googleId: string;
   googleRefreshToken: string;
+  email: string;
 }
 
 export interface DbApiToken {

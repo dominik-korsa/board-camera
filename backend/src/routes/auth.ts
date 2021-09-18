@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { GenerateAuthUrlOpts, OAuth2Client } from 'google-auth-library';
+import { ObjectId } from 'mongodb';
 import { DbManager } from '../database/database';
 import { config, getGoogleKeys } from '../config';
 
@@ -13,7 +14,11 @@ export default async function registerAuth(server: FastifyInstance, dbManager: D
 
   const generateAuthUrl = (retry: boolean, sub?: string) => {
     const opts: GenerateAuthUrlOpts = {
-      scope: ['https://www.googleapis.com/auth/userinfo.profile', 'openid'],
+      scope: [
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'https://www.googleapis.com/auth/userinfo.email',
+        'openid',
+      ],
       access_type: 'offline',
       prompt: retry ? 'consent' : 'select_account',
       login_hint: sub,
@@ -22,9 +27,14 @@ export default async function registerAuth(server: FastifyInstance, dbManager: D
   };
 
   server.get('/auth/sign-in/google', async (request, reply) => {
-    if (request.session.get('user-id')) {
-      reply.redirect('/');
-      return;
+    const userId: string | undefined = request.session.get('user-id');
+    if (userId !== undefined) {
+      const user = await dbManager.usersCollection.findOne(ObjectId.createFromHexString(userId));
+      if (user === null) request.session.set('user-id', undefined);
+      else {
+        reply.redirect('/');
+        return;
+      }
     }
     reply.redirect(generateAuthUrl(false));
   });
@@ -54,9 +64,15 @@ export default async function registerAuth(server: FastifyInstance, dbManager: D
         reply.redirect(generateAuthUrl(true, loginTicket.getPayload()?.sub));
         return;
       }
+      const email = loginTicket.getPayload()?.email;
+      if (email === undefined) {
+        server.log.error('Missing email in id_token');
+        throw server.httpErrors.internalServerError();
+      }
       const { insertedId } = await dbManager.usersCollection.insertOne({
         googleId: id,
         googleRefreshToken: tokens.refresh_token,
+        email,
       });
       userId = insertedId;
     }
