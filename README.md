@@ -25,3 +25,6 @@ Please see this if you are using windows: https://github.com/fastify/fastify-sec
 ```shell
 docker compose up -f ./docker-compose.yml -f ./docker-compose.development.yml -d
 ```
+
+## Docs
+The API is documented using Swagger. Open /api/docs in your browser (after starting) to see the docs.
