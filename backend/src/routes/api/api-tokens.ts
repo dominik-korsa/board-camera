@@ -52,4 +52,40 @@ export function registerAPITokens(apiInstance: FastifyInstance, dbManager: DbMan
       throw apiInstance.httpErrors.internalServerError();
     }
   });
+
+  const listTokensReplySchema = Type.Object({
+    tokens: Type.Array(Type.Object({
+      tokenId: Type.String(),
+      name: Type.String(),
+      createdOn: Type.String({
+        format: 'date-time',
+      }),
+    })),
+  });
+  type ListTokensReplySchema = Static<typeof listTokensReplySchema>;
+  apiInstance.get<{
+    Reply: ListTokensReplySchema,
+  }>('/api-tokens/list', {
+    schema: {
+      response: {
+        200: listTokensReplySchema,
+      },
+      security: [
+        { sessionCookie: [] },
+      ],
+      tags: ['internal'],
+    },
+  }, async (request) => {
+    const user = await requireAuthentication(request, dbManager, false);
+    const tokens = await dbManager.apiTokensCollection.find({
+      ownerId: user._id,
+    }).map((token) => ({
+      tokenId: token.tokenId,
+      name: token.name,
+      createdOn: token.createdOn.toISOString(),
+    })).toArray();
+    return {
+      tokens,
+    };
+  });
 }

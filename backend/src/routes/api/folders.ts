@@ -159,7 +159,9 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
 
   const imageSchema = Type.Object({
     shortId: Type.String(),
-    capturedOn: Type.String(),
+    capturedOn: Type.String({
+      format: 'date',
+    }),
   });
   type Image = Static<typeof imageSchema>;
   const folderInfoReplySchema = Type.Object({

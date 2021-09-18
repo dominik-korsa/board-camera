@@ -39,6 +39,7 @@ export class DbManager {
     await this.usersCollection.createIndex({ googleId: 1 }, { unique: true });
 
     await this.apiTokensCollection.createIndex({ tokenId: 1 }, { unique: true });
+    await this.apiTokensCollection.createIndex({ ownerId: 1 });
 
     await this.foldersCollection.createIndex({ shortId: 1 }, { unique: true });
     await this.foldersCollection.createIndex({ ownerId: 1 });
