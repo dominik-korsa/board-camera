@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import fse from 'fs-extra';
+import { Type } from '@sinclair/typebox';
 import { requireAuthentication } from '../../guards';
 import { hasRole } from '../../rules';
 import { DbManager } from '../../database/database';
@@ -31,6 +32,12 @@ export function registerImageDownload(apiInstance: FastifyInstance, dbManager: D
         { apiTokenHeader: [] },
         { sessionCookie: [] },
       ],
+      produces: ['image/*'],
+      response: {
+        200: Type.String({
+          format: 'binary',
+        }),
+      },
     },
   }, async (request, reply) => {
     const image = await getImage(request);
@@ -48,6 +55,12 @@ export function registerImageDownload(apiInstance: FastifyInstance, dbManager: D
           { apiTokenHeader: [] },
           { sessionCookie: [] },
         ],
+        produces: ['image/webp'],
+        response: {
+          200: Type.String({
+            format: 'binary',
+          }),
+        },
       },
     }, async (request, reply) => {
       const image = await getImage(request);
