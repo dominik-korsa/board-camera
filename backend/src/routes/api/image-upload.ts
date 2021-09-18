@@ -11,6 +11,7 @@ import { config } from '../../config';
 import analyseImage from '../../analyse';
 import { DbManager } from '../../database/database';
 import { DbImageBoard } from '../../database/types';
+import { FolderParams, folderParamsSchema } from './common';
 
 export function registerImageUpload(apiInstance: FastifyInstance, dbManager: DbManager) {
   const uploadImageReplySchema = Type.Object({
@@ -18,12 +19,11 @@ export function registerImageUpload(apiInstance: FastifyInstance, dbManager: DbM
   });
   type UploadImageReply = Static<typeof uploadImageReplySchema>;
   apiInstance.post<{
-    Params: {
-      folderShortId: string;
-    },
+    Params: FolderParams,
     Reply: UploadImageReply,
   }>('/folders/:folderShortId/upload-image', {
     schema: {
+      params: folderParamsSchema,
       response: {
         200: uploadImageReplySchema,
       },

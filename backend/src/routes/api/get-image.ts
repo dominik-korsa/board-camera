@@ -4,11 +4,7 @@ import { requireAuthentication } from '../../guards';
 import { hasRole } from '../../rules';
 import { DbManager } from '../../database/database';
 import { DbCompressedImageSize } from '../../database/types';
-
-type ImageParams = {
-  folderShortId: string;
-  imageShortId: string;
-};
+import { ImageParams, imageParamsSchema } from './common';
 
 export function registerImageDownload(apiInstance: FastifyInstance, dbManager: DbManager) {
   const getImage = async (request: FastifyRequest<{ Params: ImageParams }>) => {
@@ -30,6 +26,7 @@ export function registerImageDownload(apiInstance: FastifyInstance, dbManager: D
     Params: ImageParams,
   }>('/folders/:folderShortId/images/:imageShortId/raw', {
     schema: {
+      params: imageParamsSchema,
       security: [
         { apiTokenHeader: [] },
         { sessionCookie: [] },
@@ -46,6 +43,7 @@ export function registerImageDownload(apiInstance: FastifyInstance, dbManager: D
       Params: ImageParams,
     }>(`/folders/:folderShortId/images/:imageShortId/${size}.webp`, {
       schema: {
+        params: imageParamsSchema,
         security: [
           { apiTokenHeader: [] },
           { sessionCookie: [] },

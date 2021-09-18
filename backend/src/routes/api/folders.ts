@@ -6,6 +6,7 @@ import { DbManager } from '../../database/database';
 import { requireAuthentication } from '../../guards';
 import { DbChildFolder, DbFolder, DbRootFolder } from '../../database/types';
 import { hasRole } from '../../rules';
+import { FolderParams, folderParamsSchema } from './common';
 
 const folderSchema = Type.Object({
   shortId: Type.String(),
@@ -73,11 +74,12 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
   });
 
   apiInstance.post<{
-    Params: { folderShortId: string },
+    Params: FolderParams,
     Body: CreateFolderBody,
     Reply: CreateFolderReply,
   }>('/folders/:folderShortId/create-folder', {
     schema: {
+      params: folderParamsSchema,
       body: createFolderBodySchema,
       response: {
         200: createFolderReplySchema,
@@ -172,10 +174,11 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
   });
   type FolderInfoReply = Static<typeof folderInfoReplySchema>;
   apiInstance.get<{
-    Params: { folderShortId: string },
+    Params: FolderParams,
     Reply: FolderInfoReply,
   }>('/folders/:folderShortId/info', {
     schema: {
+      params: folderParamsSchema,
       response: {
         200: folderInfoReplySchema,
       },
@@ -228,10 +231,11 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
   });
   type RenameFolderBody = Static<typeof renameFolderBodySchema>;
   apiInstance.post<{
-    Params: { folderShortId: string },
+    Params: FolderParams,
     Body: RenameFolderBody,
   }>('/folders/:folderShortId/rename', {
     schema: {
+      params: folderParamsSchema,
       body: renameFolderBodySchema,
       security: [
         { apiTokenHeader: [] },
