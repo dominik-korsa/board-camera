@@ -130,7 +130,7 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
   type ListUserFoldersReply = Static<typeof listUserFoldersReplySchema>;
   apiInstance.get<{
     Reply: ListUserFoldersReply,
-  }>('/api/list-user-folders', {
+  }>('/list-user-folders', {
     schema: {
       response: {
         200: listUserFoldersReplySchema,

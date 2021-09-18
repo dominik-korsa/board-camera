@@ -17,6 +17,7 @@ export function registerAPITokens(apiInstance: FastifyInstance, dbManager: DbMan
       security: [
         { sessionCookie: [] },
       ],
+      tags: ['internal'],
     },
   }, async (request) => {
     const user = await requireAuthentication(request, dbManager, false);
