@@ -28,7 +28,14 @@ export function registerImageDownload(apiInstance: FastifyInstance, dbManager: D
 
   apiInstance.get<{
     Params: ImageParams,
-  }>('/folders/:folderShortId/images/:imageShortId/raw', async (request, reply) => {
+  }>('/folders/:folderShortId/images/:imageShortId/raw', {
+    schema: {
+      security: [
+        { apiTokenHeader: [] },
+        { sessionCookie: [] },
+      ],
+    },
+  }, async (request, reply) => {
     const image = await getImage(request);
     reply.type(image.rawFile.mimeType).send(fse.createReadStream(image.rawFile.path));
   });
@@ -37,7 +44,14 @@ export function registerImageDownload(apiInstance: FastifyInstance, dbManager: D
   sizes.forEach((size) => {
     apiInstance.get<{
       Params: ImageParams,
-    }>(`/folders/:folderShortId/images/:imageShortId/${size}.webp`, async (request, reply) => {
+    }>(`/folders/:folderShortId/images/:imageShortId/${size}.webp`, {
+      schema: {
+        security: [
+          { apiTokenHeader: [] },
+          { sessionCookie: [] },
+        ],
+      },
+    }, async (request, reply) => {
       const image = await getImage(request);
       reply.type('image/webp').send(fse.createReadStream(image.compressedFilePaths[size]));
     });

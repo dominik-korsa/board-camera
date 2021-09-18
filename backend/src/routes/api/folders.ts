@@ -37,6 +37,10 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
       response: {
         200: createFolderReplySchema,
       },
+      security: [
+        { apiTokenHeader: [] },
+        { sessionCookie: [] },
+      ],
     },
   }, async (request) => {
     const user = await requireAuthentication(request, dbManager, true);
@@ -78,6 +82,10 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
       response: {
         200: createFolderReplySchema,
       },
+      security: [
+        { apiTokenHeader: [] },
+        { sessionCookie: [] },
+      ],
     },
   }, async (request) => {
     const user = await requireAuthentication(request, dbManager, true);
@@ -125,6 +133,10 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
       response: {
         200: listUserFoldersReplySchema,
       },
+      security: [
+        { apiTokenHeader: [] },
+        { sessionCookie: [] },
+      ],
     },
   }, async (request) => {
     const user = await requireAuthentication(request, dbManager, true);
@@ -167,6 +179,10 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
       response: {
         200: folderInfoReplySchema,
       },
+      security: [
+        { apiTokenHeader: [] },
+        { sessionCookie: [] },
+      ],
     },
   }, async (request) => {
     const user = await requireAuthentication(request, dbManager, true);
@@ -218,7 +234,7 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
     schema: {
       body: renameFolderBodySchema,
       security: [
-        { apiKeyHeader: [] },
+        { apiTokenHeader: [] },
         { sessionCookie: [] },
       ],
     },

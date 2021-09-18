@@ -8,10 +8,10 @@ export default function registerSwagger(server: FastifyInstance) {
     openapi: {
       components: {
         securitySchemes: {
-          apiKeyHeader: {
+          apiTokenHeader: {
             type: 'apiKey',
             in: 'header',
-            name: 'x-api-key',
+            name: 'x-api-token',
           },
           sessionCookie: {
             type: 'apiKey',

@@ -27,6 +27,10 @@ export function registerImageUpload(apiInstance: FastifyInstance, dbManager: DbM
       response: {
         200: uploadImageReplySchema,
       },
+      security: [
+        { apiTokenHeader: [] },
+        { sessionCookie: [] },
+      ],
     },
   }, async (request) => {
     const user = await requireAuthentication(request, dbManager, true);
