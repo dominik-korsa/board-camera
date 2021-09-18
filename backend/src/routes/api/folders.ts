@@ -2,10 +2,10 @@ import { FastifyInstance } from 'fastify';
 import { nanoid } from 'nanoid';
 import { Static, Type } from '@sinclair/typebox';
 import { WithoutId } from 'mongodb';
-import { DbManager } from '../database/database';
-import { requireAuthentication } from '../guards';
-import { DbChildFolder, DbFolder, DbRootFolder } from '../database/types';
-import { hasRole } from '../rules';
+import { DbManager } from '../../database/database';
+import { requireAuthentication } from '../../guards';
+import { DbChildFolder, DbFolder, DbRootFolder } from '../../database/types';
+import { hasRole } from '../../rules';
 
 const folderSchema = Type.Object({
   shortId: Type.String(),
@@ -19,7 +19,7 @@ function mapFolder(folder: DbFolder): Folder {
   };
 }
 
-export default function registerFolders(server: FastifyInstance, dbManager: DbManager) {
+export default function registerFolders(apiInstance: FastifyInstance, dbManager: DbManager) {
   const createFolderBodySchema = Type.Object({
     name: Type.String(),
   });
@@ -28,10 +28,10 @@ export default function registerFolders(server: FastifyInstance, dbManager: DbMa
     shortId: Type.String(),
   });
   type CreateFolderReply = Static<typeof createFolderReplySchema>;
-  server.post<{
+  apiInstance.post<{
     Body: CreateFolderBody,
     Reply: CreateFolderReply,
-  }>('/api/create-root-folder', {
+  }>('/create-root-folder', {
     schema: {
       body: createFolderBodySchema,
       response: {
@@ -68,11 +68,11 @@ export default function registerFolders(server: FastifyInstance, dbManager: DbMa
     };
   });
 
-  server.post<{
+  apiInstance.post<{
     Params: { folderShortId: string },
     Body: CreateFolderBody,
     Reply: CreateFolderReply,
-  }>('/api/folders/:folderShortId/create-folder', {
+  }>('/folders/:folderShortId/create-folder', {
     schema: {
       body: createFolderBodySchema,
       response: {
@@ -84,8 +84,8 @@ export default function registerFolders(server: FastifyInstance, dbManager: DbMa
     const folder = await dbManager.foldersCollection.findOne({
       shortId: request.params.folderShortId,
     });
-    if (!folder) throw server.httpErrors.notFound('Folder not found');
-    if (!hasRole(folder, user._id, 'editor')) throw server.httpErrors.forbidden();
+    if (!folder) throw apiInstance.httpErrors.notFound('Folder not found');
+    if (!hasRole(folder, user._id, 'editor')) throw apiInstance.httpErrors.forbidden();
     let shortId: string;
     do {
       shortId = nanoid(10);
@@ -118,7 +118,7 @@ export default function registerFolders(server: FastifyInstance, dbManager: DbMa
     sharedFolders: Type.Array(folderSchema),
   });
   type ListUserFoldersReply = Static<typeof listUserFoldersReplySchema>;
-  server.get<{
+  apiInstance.get<{
     Reply: ListUserFoldersReply,
   }>('/api/list-user-folders', {
     schema: {
@@ -159,10 +159,10 @@ export default function registerFolders(server: FastifyInstance, dbManager: DbMa
     }),
   });
   type FolderInfoReply = Static<typeof folderInfoReplySchema>;
-  server.get<{
+  apiInstance.get<{
     Params: { folderShortId: string },
     Reply: FolderInfoReply,
-  }>('/api/folders/:folderShortId/info', {
+  }>('/folders/:folderShortId/info', {
     schema: {
       response: {
         200: folderInfoReplySchema,
@@ -173,8 +173,8 @@ export default function registerFolders(server: FastifyInstance, dbManager: DbMa
     const folder = await dbManager.foldersCollection.findOne({
       shortId: request.params.folderShortId,
     });
-    if (!folder) throw server.httpErrors.notFound('Folder not found');
-    if (!hasRole(folder, user._id, 'viewer')) throw server.httpErrors.forbidden();
+    if (!folder) throw apiInstance.httpErrors.notFound('Folder not found');
+    if (!hasRole(folder, user._id, 'viewer')) throw apiInstance.httpErrors.forbidden();
     let isRootAndOwner: boolean;
     let parentFolderShortId: string | null;
     if (folder.parentFolderId === null) {
@@ -183,7 +183,7 @@ export default function registerFolders(server: FastifyInstance, dbManager: DbMa
     } else {
       isRootAndOwner = false;
       const parentFolder = await dbManager.foldersCollection.findOne(folder.parentFolderId);
-      if (parentFolder === null) throw server.httpErrors.internalServerError('Cannot find parent folder');
+      if (parentFolder === null) throw apiInstance.httpErrors.internalServerError('Cannot find parent folder');
       parentFolderShortId = parentFolder.shortId;
     }
     const subfolders = await dbManager.foldersCollection.find({
@@ -211,20 +211,24 @@ export default function registerFolders(server: FastifyInstance, dbManager: DbMa
     name: Type.String(),
   });
   type RenameFolderBody = Static<typeof renameFolderBodySchema>;
-  server.post<{
+  apiInstance.post<{
     Params: { folderShortId: string },
     Body: RenameFolderBody,
-  }>('/api/folders/:folderShortId/rename', {
+  }>('/folders/:folderShortId/rename', {
     schema: {
       body: renameFolderBodySchema,
+      security: [
+        { apiKeyHeader: [] },
+        { sessionCookie: [] },
+      ],
     },
   }, async (request) => {
     const user = await requireAuthentication(request, dbManager, true);
     const folder = await dbManager.foldersCollection.findOne({
       shortId: request.params.folderShortId,
     });
-    if (!folder) throw server.httpErrors.notFound('Folder not found');
-    if (!hasRole(folder, user._id, 'editor')) throw server.httpErrors.forbidden();
+    if (!folder) throw apiInstance.httpErrors.notFound('Folder not found');
+    if (!hasRole(folder, user._id, 'editor')) throw apiInstance.httpErrors.forbidden();
     await dbManager.foldersCollection.updateOne({ _id: folder._id }, {
       $set: {
         name: request.body.name.trim(),

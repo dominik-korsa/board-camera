@@ -1,11 +1,24 @@
 import { FastifyInstance } from 'fastify';
 import { nanoid } from 'nanoid';
 import bcrypt from 'bcrypt';
-import { DbManager } from '../database/database';
-import { requireAuthentication } from '../guards';
+import { Static, Type } from '@sinclair/typebox';
+import { DbManager } from '../../database/database';
+import { requireAuthentication } from '../../guards';
 
-export function registerAPITokens(server: FastifyInstance, dbManager: DbManager) {
-  server.post('/api/api-tokens/generate', async (request) => {
+export function registerAPITokens(apiInstance: FastifyInstance, dbManager: DbManager) {
+  const generateTokenReplySchema = Type.Object({
+    token: Type.String(),
+  });
+  type GenerateTokenReply = Static<typeof generateTokenReplySchema>;
+  apiInstance.post<{
+    Reply: GenerateTokenReply,
+  }>('/api-tokens/generate', {
+    schema: {
+      security: [
+        { sessionCookie: [] },
+      ],
+    },
+  }, async (request) => {
     const user = await requireAuthentication(request, dbManager, false);
     try {
       let tokenId;
@@ -23,8 +36,8 @@ export function registerAPITokens(server: FastifyInstance, dbManager: DbManager)
       });
       return { token };
     } catch (error) {
-      server.log.error(error);
-      throw server.httpErrors.internalServerError();
+      apiInstance.log.error(error);
+      throw apiInstance.httpErrors.internalServerError();
     }
   });
 }

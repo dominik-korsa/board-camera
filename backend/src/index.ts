@@ -4,13 +4,10 @@ import { IncomingMessage } from 'http';
 import FastifySecureSession from 'fastify-secure-session';
 import fsPromises from 'fs/promises';
 import { parseMultipart } from './utils';
-import registerFolders from './routes/folders';
 import { connectDb } from './database/database';
 import registerAuth from './routes/auth';
 import { config } from './config';
-import { registerAPITokens } from './routes/api-tokens';
-import { registerImageUpload } from './routes/image-upload';
-import { registerImageDownload } from './routes/get-image';
+import { ApiPlugin } from './routes/register-api';
 
 async function main() {
   const dbManager = await connectDb();
@@ -34,10 +31,10 @@ async function main() {
   server.log.info('DB connected');
   await dbManager.updateAllFolderCaches();
   await registerAuth(server, dbManager);
-  registerFolders(server, dbManager);
-  registerAPITokens(server, dbManager);
-  registerImageUpload(server, dbManager);
-  registerImageDownload(server, dbManager);
+  server.register(ApiPlugin, {
+    prefix: '/api',
+    dbManager,
+  });
   server.get('/', (request, reply) => {
     reply.send('Witaj!');
   });

@@ -4,25 +4,25 @@ import { nanoid } from 'nanoid';
 import fse from 'fs-extra';
 import { FastifyInstance } from 'fastify';
 import sharp from 'sharp';
-import { requireAuthentication } from '../guards';
-import { mapObject, MultipartData } from '../utils';
-import { hasRole } from '../rules';
-import { config } from '../config';
-import analyseImage from '../analyse';
-import { DbManager } from '../database/database';
-import { DbImageBoard } from '../database/types';
+import { requireAuthentication } from '../../guards';
+import { mapObject, MultipartData } from '../../utils';
+import { hasRole } from '../../rules';
+import { config } from '../../config';
+import analyseImage from '../../analyse';
+import { DbManager } from '../../database/database';
+import { DbImageBoard } from '../../database/types';
 
-export function registerImageUpload(server: FastifyInstance, dbManager: DbManager) {
+export function registerImageUpload(apiInstance: FastifyInstance, dbManager: DbManager) {
   const uploadImageReplySchema = Type.Object({
     shortId: Type.String(),
   });
   type UploadImageReply = Static<typeof uploadImageReplySchema>;
-  server.post<{
+  apiInstance.post<{
     Params: {
       folderShortId: string;
     },
     Reply: UploadImageReply,
-  }>('/api/folders/:folderShortId/upload-image', {
+  }>('/folders/:folderShortId/upload-image', {
     schema: {
       response: {
         200: uploadImageReplySchema,
@@ -32,18 +32,18 @@ export function registerImageUpload(server: FastifyInstance, dbManager: DbManage
     const user = await requireAuthentication(request, dbManager, true);
     const data = request.body as MultipartData;
     const { file } = data.files;
-    if (!file) throw server.httpErrors.badRequest('Missing "file"');
+    if (!file) throw apiInstance.httpErrors.badRequest('Missing "file"');
     const supportedTypes = ['image/bmp', 'image/jpeg', 'image/png', 'image/webp'];
-    if (!supportedTypes.includes(file.mimeType)) throw server.httpErrors.unsupportedMediaType(`Unsupported media type. Supported formats: ${supportedTypes.map((x) => `"${x}"`).join(', ')}`);
+    if (!supportedTypes.includes(file.mimeType)) throw apiInstance.httpErrors.unsupportedMediaType(`Unsupported media type. Supported formats: ${supportedTypes.map((x) => `"${x}"`).join(', ')}`);
     if (!data.fields.capturedOn || typeof data.fields.capturedOn !== 'string') {
-      throw server.httpErrors.badRequest('Missing "capturedOn"');
+      throw apiInstance.httpErrors.badRequest('Missing "capturedOn"');
     }
-    if (Number.isNaN(Date.parse(data.fields.capturedOn))) throw server.httpErrors.badRequest('Invalid date');
+    if (Number.isNaN(Date.parse(data.fields.capturedOn))) throw apiInstance.httpErrors.badRequest('Invalid date');
     const folder = await dbManager.foldersCollection.findOne({
       shortId: request.params.folderShortId,
     });
-    if (folder === null) throw server.httpErrors.notFound('Folder not found');
-    if (!hasRole(folder, user._id, 'editor')) throw server.httpErrors.forbidden();
+    if (folder === null) throw apiInstance.httpErrors.notFound('Folder not found');
+    if (!hasRole(folder, user._id, 'editor')) throw apiInstance.httpErrors.forbidden();
 
     let folderPath: string;
     do {
@@ -80,7 +80,7 @@ export function registerImageUpload(server: FastifyInstance, dbManager: DbManage
       async () => {
         try {
           boards = await analyseImage(file.data, dbManager, [[0, 1, 2, 3]]);
-        } catch (error) { server.log.error(error); }
+        } catch (error) { apiInstance.log.error(error); }
       },
       sharp(file.data).rotate().toFile(fullPath),
       Promise.all(Object.values(transforms).map((x) => x.execute())),
