@@ -159,7 +159,7 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
 
   const imageSchema = Type.Object({
     shortId: Type.String(),
-    capturedOnDate: Type.String(),
+    capturedOn: Type.String(),
   });
   type Image = Static<typeof imageSchema>;
   const folderInfoReplySchema = Type.Object({
@@ -212,7 +212,7 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
       folderId: folder._id,
     }).map((image): Image => ({
       shortId: image.shortId,
-      capturedOnDate: image.capturedOnDate,
+      capturedOn: image.capturedOnDay,
     })).toArray();
     return {
       subfolders,

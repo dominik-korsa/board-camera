@@ -98,8 +98,8 @@ export function registerImageUpload(apiInstance: FastifyInstance, dbManager: DbM
     await dbManager.imagesCollection.insertOne({
       shortId,
       boards,
-      capturedOnDate: data.fields.capturedOn,
-      uploadedOnDateTime: new Date().toISOString(),
+      capturedOnDay: data.fields.capturedOn,
+      uploadedOn: new Date(),
       folderId: folder._id,
       uploaderId: user._id,
       rawFile: {

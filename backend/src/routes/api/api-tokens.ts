@@ -6,14 +6,23 @@ import { DbManager } from '../../database/database';
 import { requireAuthentication } from '../../guards';
 
 export function registerAPITokens(apiInstance: FastifyInstance, dbManager: DbManager) {
+  const generateTokenBodySchema = Type.Object({
+    name: Type.String(),
+  });
+  type GenerateTokenBody = Static<typeof generateTokenBodySchema>;
   const generateTokenReplySchema = Type.Object({
     token: Type.String(),
   });
   type GenerateTokenReply = Static<typeof generateTokenReplySchema>;
   apiInstance.post<{
+    Body: GenerateTokenBody,
     Reply: GenerateTokenReply,
   }>('/api-tokens/generate', {
     schema: {
+      body: generateTokenBodySchema,
+      response: {
+        200: generateTokenReplySchema,
+      },
       security: [
         { sessionCookie: [] },
       ],
@@ -34,6 +43,8 @@ export function registerAPITokens(apiInstance: FastifyInstance, dbManager: DbMan
         tokenId,
         tokenHash: hash,
         ownerId: user._id,
+        createdOn: new Date(),
+        name: request.body.name,
       });
       return { token };
     } catch (error) {

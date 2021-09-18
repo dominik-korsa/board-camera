@@ -24,8 +24,8 @@ export interface DbImage {
     mimeType: string;
   }
   compressedFilePaths: Record<DbCompressedImageSize, string>;
-  capturedOnDate: string;
-  uploadedOnDateTime: string;
+  capturedOnDay: string;
+  uploadedOn: Date;
   boards: DbImageBoard[] | null;
   uploaderId: ObjectId;
   folderId: ObjectId;
@@ -43,6 +43,8 @@ export interface DbApiToken {
   tokenId: string;
   tokenHash: string;
   ownerId: ObjectId;
+  name: string;
+  createdOn: Date;
 }
 
 export type Role = 'viewer' | 'contributor' | 'editor' | 'admin';
