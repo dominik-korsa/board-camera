@@ -12,3 +12,6 @@ export const imageParamsSchema = Type.Intersect([
   }),
 ]);
 export type ImageParams = Static<typeof imageParamsSchema>;
+
+export const emptyReplySchema = Type.Object({});
+export type EmptyReply = Static<typeof emptyReplySchema>;

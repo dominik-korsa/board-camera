@@ -6,7 +6,9 @@ import { DbManager } from '../../database/database';
 import { requireAuthentication } from '../../guards';
 import { DbChildFolder, DbFolder, DbRootFolder } from '../../database/types';
 import { hasRole } from '../../rules';
-import { FolderParams, folderParamsSchema } from './common';
+import {
+  EmptyReply, emptyReplySchema, FolderParams, folderParamsSchema,
+} from './common';
 
 const folderSchema = Type.Object({
   shortId: Type.String(),
@@ -235,6 +237,7 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
   apiInstance.post<{
     Params: FolderParams,
     Body: RenameFolderBody,
+    Reply: EmptyReply,
   }>('/folders/:folderShortId/rename', {
     schema: {
       params: folderParamsSchema,
@@ -243,6 +246,9 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
         { apiTokenHeader: [] },
         { sessionCookie: [] },
       ],
+      response: {
+        200: emptyReplySchema,
+      },
     },
   }, async (request) => {
     const user = await requireAuthentication(request, dbManager, true);
