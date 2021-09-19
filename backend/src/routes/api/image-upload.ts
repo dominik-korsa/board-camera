@@ -5,7 +5,7 @@ import fse from 'fs-extra';
 import { FastifyInstance } from 'fastify';
 import sharp from 'sharp';
 import { requireAuthentication } from '../../guards';
-import { mapObject, MultipartData } from '../../utils';
+import { mapObject } from '../../utils';
 import { hasRole } from '../../rules';
 import { config } from '../../config';
 import analyseImage from '../../analyse';
@@ -14,15 +14,26 @@ import { DbImageBoard } from '../../database/types';
 import { FolderParams, folderParamsSchema } from './common';
 
 export function registerImageUpload(apiInstance: FastifyInstance, dbManager: DbManager) {
+  const uploadImageBodySchema = Type.Object({
+    capturedOn: Type.String({
+      format: 'date',
+    }),
+  });
+  type UploadImageBody = Static<typeof uploadImageBodySchema>;
   const uploadImageReplySchema = Type.Object({
     shortId: Type.String(),
   });
   type UploadImageReply = Static<typeof uploadImageReplySchema>;
   apiInstance.post<{
+    Body: UploadImageBody,
     Params: FolderParams,
     Reply: UploadImageReply,
+    Files: ['file'],
   }>('/folders/:folderShortId/upload-image', {
     schema: {
+      consumes: ['multipart/form-data'],
+      files: ['file'],
+      body: uploadImageBodySchema,
       params: folderParamsSchema,
       response: {
         200: uploadImageReplySchema,
@@ -34,15 +45,10 @@ export function registerImageUpload(apiInstance: FastifyInstance, dbManager: DbM
     },
   }, async (request) => {
     const user = await requireAuthentication(request, dbManager, true);
-    const data = request.body as MultipartData;
-    const { file } = data.files;
+    const { file } = request.files;
     if (!file) throw apiInstance.httpErrors.badRequest('Missing "file"');
     const supportedTypes = ['image/bmp', 'image/jpeg', 'image/png', 'image/webp'];
     if (!supportedTypes.includes(file.mimeType)) throw apiInstance.httpErrors.unsupportedMediaType(`Unsupported media type. Supported formats: ${supportedTypes.map((x) => `"${x}"`).join(', ')}`);
-    if (!data.fields.capturedOn || typeof data.fields.capturedOn !== 'string') {
-      throw apiInstance.httpErrors.badRequest('Missing "capturedOn"');
-    }
-    if (Number.isNaN(Date.parse(data.fields.capturedOn))) throw apiInstance.httpErrors.badRequest('Invalid date');
     const folder = await dbManager.foldersCollection.findOne({
       shortId: request.params.folderShortId,
     });
@@ -98,7 +104,7 @@ export function registerImageUpload(apiInstance: FastifyInstance, dbManager: DbM
     await dbManager.imagesCollection.insertOne({
       shortId,
       boards,
-      capturedOnDay: data.fields.capturedOn,
+      capturedOnDay: request.body.capturedOn,
       uploadedOn: new Date(),
       folderId: folder._id,
       uploaderId: user._id,

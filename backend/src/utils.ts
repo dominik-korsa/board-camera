@@ -14,7 +14,7 @@ export interface File {
   mimeType: string;
 }
 
-export interface MultipartData {
+export interface MultipartBody {
   files: Partial<Record<string, File>>;
   fields: Partial<Record<string, unknown>>;
 }
@@ -37,8 +37,8 @@ export function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
 export function parseMultipart(
   request: FastifyRequest,
   payload: IncomingMessage,
-): Promise<MultipartData> {
-  return new Promise<MultipartData>((resolve) => {
+): Promise<MultipartBody> {
+  return new Promise<MultipartBody>((resolve) => {
     const busboy = new Busboy({
       headers: request.headers,
     });

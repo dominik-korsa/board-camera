@@ -1,5 +1,7 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifySchema } from 'fastify';
 import FastifySwagger from 'fastify-swagger';
+import { JSONSchema7 } from 'json-schema';
+import { Type } from '@sinclair/typebox';
 
 export default function registerSwagger(server: FastifyInstance) {
   server.register(FastifySwagger, {
@@ -39,6 +41,30 @@ export default function registerSwagger(server: FastifyInstance) {
           },
         },
       },
+    },
+    transform: (schema: FastifySchema): FastifySchema => {
+      let newBody: JSONSchema7 | undefined;
+      if (typeof schema.body === 'object' && schema.body !== null) {
+        newBody = { ...schema.body };
+      }
+      if (schema.files !== undefined) {
+        if (newBody === undefined) newBody = Type.Object({});
+        const newProperties = Object.fromEntries(schema.files.map(
+          (fieldName) => [fieldName, Type.String({ format: 'binary' })],
+        ));
+        newBody.properties = {
+          ...newBody.properties,
+          ...newProperties,
+        };
+        newBody.required = [
+          ...newBody.required ?? [],
+          ...schema.files,
+        ];
+      }
+      return {
+        ...schema,
+        body: newBody,
+      };
     },
   });
 }

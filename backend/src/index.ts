@@ -22,10 +22,25 @@ async function main() {
       path: '/',
     },
   });
+  server.decorateRequest('files', null);
   server.addContentTypeParser('multipart/form-data', (request: FastifyRequest, payload: IncomingMessage, done) => {
     parseMultipart(request, payload)
-      .then((data) => done(null, data))
+      .then((result) => {
+        request.files = result.files;
+        done(null, result.fields);
+      })
       .catch((error) => done(error, undefined));
+  });
+  server.addHook('preHandler', async (request, reply) => {
+    const { schema } = reply.context;
+    if (schema?.files === undefined) return;
+    const fileFields = new Set<string>();
+    if (request.files !== null) {
+      Object.keys(request.files).forEach((field) => fileFields.add(field));
+    }
+    schema.files.forEach((field) => {
+      if (!fileFields.has(field)) throw server.httpErrors.badRequest(`Missing "${field}" file field`);
+    });
   });
 
   server.log.info('DB connected');
