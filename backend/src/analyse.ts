@@ -2,6 +2,7 @@ import FormData from 'form-data';
 import got from 'got';
 import { DbManager } from './database/database';
 import { DbImageBoard } from './database/types';
+import { File } from './utils';
 
 interface AnalyseImageResult {
   points: [number, number][];
@@ -13,15 +14,19 @@ interface AnalyseImageResult {
 type AnalyseImageResponse = Record<number, AnalyseImageResult>;
 
 export default async function analyseImage(
-  data: Buffer,
+  file: File,
   dbManager: DbManager,
   markers: number[][],
 ): Promise<DbImageBoard[]> {
   const form = new FormData();
-  form.append('file', data);
+  form.append('file', file.data, {
+    filename: file.filename,
+    contentType: file.mimeType,
+  });
   form.append('markers', JSON.stringify(markers));
   const response = await got.post<AnalyseImageResponse>('http://transformer/analyse', {
-    body: form,
+    body: form.getBuffer(),
+    headers: form.getHeaders(),
     responseType: 'json',
   });
   return Object.values(response.body).map((value) => {

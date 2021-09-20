@@ -85,13 +85,14 @@ export function registerImageUpload(apiInstance: FastifyInstance, dbManager: DbM
     };
 
     let boards: DbImageBoard[] | null = null;
+    const loadBoards = async () => {
+      try {
+        boards = await analyseImage(file, dbManager, [[0, 1, 2, 3]]);
+      } catch (error) { apiInstance.log.error(error); }
+    };
     await Promise.all([
       fse.writeFile(rawPath, file.data),
-      async () => {
-        try {
-          boards = await analyseImage(file.data, dbManager, [[0, 1, 2, 3]]);
-        } catch (error) { apiInstance.log.error(error); }
-      },
+      loadBoards(),
       sharp(file.data).rotate().toFile(fullPath),
       Promise.all(Object.values(transforms).map((x) => x.execute())),
     ]);

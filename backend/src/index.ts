@@ -51,7 +51,10 @@ async function main() {
     dbManager,
   });
   server.get('/', (request, reply) => {
-    reply.send('Witaj!');
+    reply.type('text/html');
+    if (request.session.get('user-id') === undefined) {
+      reply.send('<a href="/auth/sign-in/google">Sign in with google</a>');
+    } reply.send('<a href="/auth/sign-out">Sign out</a>');
   });
   await server.listen(config.port, '0.0.0.0');
   server.log.info('Fastify ready');
