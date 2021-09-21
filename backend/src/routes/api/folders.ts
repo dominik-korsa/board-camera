@@ -164,7 +164,6 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
     subfolders: Type.Array(folderSchema),
     images: Type.Array(imageSchema),
     name: Type.String(),
-    // TODO: Change to array of shortId and name
     parentFolderShortId: Type.Union([Type.String(), Type.Null()]),
     viewer: Type.Object({
       isRootAndOwner: Type.Boolean(),
