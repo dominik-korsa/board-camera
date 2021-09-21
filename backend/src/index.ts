@@ -3,6 +3,8 @@ import FastifySensible from 'fastify-sensible';
 import { IncomingMessage } from 'http';
 import FastifySecureSession from 'fastify-secure-session';
 import fsPromises from 'fs/promises';
+import fs from 'fs';
+import path from 'path';
 import { parseMultipart } from './utils';
 import { connectDb } from './database/database';
 import registerAuth from './routes/auth';
@@ -55,6 +57,10 @@ async function main() {
     if (request.session.get('user-id') === undefined) {
       reply.send('<a href="/auth/sign-in/google">Sign in with google</a>');
     } reply.send('<a href="/auth/sign-out">Sign out</a>');
+  });
+  server.get('/upload-test', (request, reply) => {
+    const filePath = path.resolve('./static/upload-test.html');
+    reply.type('text/html').send(fs.createReadStream(filePath));
   });
   await server.listen(config.port, '0.0.0.0');
   server.log.info('Fastify ready');
