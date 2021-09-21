@@ -14,7 +14,7 @@ export function registerImageDownload(apiInstance: FastifyInstance, dbManager: D
       shortId: request.params.folderShortId,
     });
     if (folder === null) throw apiInstance.httpErrors.notFound('Folder not found');
-    if (!hasRole(folder, user._id, 'viewer')) throw apiInstance.httpErrors.forbidden();
+    if (!hasRole(folder, user, 'viewer')) throw apiInstance.httpErrors.forbidden();
     const image = await dbManager.imagesCollection.findOne({
       shortId: request.params.imageShortId,
       folderId: folder._id,

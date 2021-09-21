@@ -53,7 +53,7 @@ export function registerImageUpload(apiInstance: FastifyInstance, dbManager: DbM
       shortId: request.params.folderShortId,
     });
     if (folder === null) throw apiInstance.httpErrors.notFound('Folder not found');
-    if (!hasRole(folder, user._id, 'editor')) throw apiInstance.httpErrors.forbidden();
+    if (!hasRole(folder, user, 'editor')) throw apiInstance.httpErrors.forbidden();
 
     let folderPath: string;
     do {

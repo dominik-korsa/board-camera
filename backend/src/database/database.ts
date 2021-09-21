@@ -65,12 +65,16 @@ export class DbManager {
     Object.entries(parentUserRecursiveRole).forEach(([key, value]) => {
       newCache.userRecursiveRole[key] = value;
     });
-    if (folder.parentFolderId === null) newCache.userRecursiveRole[folder.ownerId.toHexString()] = 'owner';
+    if (folder.parentFolderId === null) {
+      const owner = await this.usersCollection.findOne(folder.ownerId);
+      if (owner === null) throw new Error('Cannot find owner of folder');
+      newCache.userRecursiveRole[owner.email] = 'owner';
+    }
     folder.rules.forEach((rule) => {
-      const prevRole = newCache.userRecursiveRole[rule.userId.toHexString()];
-      if (prevRole === undefined) newCache.shareRootFor.push(rule.userId);
-      if (compareRoles(rule.role, prevRole) > 0) {
-        newCache.userRecursiveRole[rule.userId.toHexString()] = rule.role;
+      const prevRole: RecursiveRole | undefined = newCache.userRecursiveRole[rule.email];
+      if (prevRole === undefined) newCache.shareRootFor.push(rule.email);
+      if (compareRoles(rule.role, prevRole ?? 'none') > 0) {
+        newCache.userRecursiveRole[rule.email] = rule.role;
       }
     });
     await this.foldersCollection.updateOne({
@@ -94,21 +98,31 @@ export class DbManager {
     );
   }
 
+  // https://jira.mongodb.org/browse/NODE-2014
   async withSession<T, Args extends unknown[]>(
     fn: (session: ClientSession, ...args: Args) => Promise<T>,
     ...args: Args
   ): Promise<T> {
-    const session = this.client.startSession({
+    let result: T | undefined;
+    await this.client.withSession({
       causalConsistency: true,
+    }, async (session) => {
+      result = await fn(session, ...args);
     });
-    try {
-      const result = await fn(session, ...args);
-      await session.endSession();
-      return result;
-    } catch (error) {
-      await session.endSession();
-      throw error;
-    }
+    return result as T;
+  }
+
+  async withTransaction<T, Args extends unknown[]>(
+    fn: (...args: Args) => Promise<T>,
+    ...args: Args
+  ): Promise<T> {
+    return this.withSession(async (session) => {
+      let result: T | undefined;
+      await session.withTransaction(async () => {
+        result = await fn(...args);
+      });
+      return result as T;
+    });
   }
 }
 

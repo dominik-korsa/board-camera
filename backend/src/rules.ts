@@ -1,5 +1,4 @@
-import { ObjectId } from 'mongodb';
-import { DbFolder, RecursiveRole } from './database/types';
+import { DbFolder, DbUser, RecursiveRole } from './database/types';
 
 export const rolePreference: Record<RecursiveRole | 'none', number> = {
   none: 0,
@@ -18,6 +17,6 @@ export function compareRoles(lhs: RecursiveRole | 'none', rhs: RecursiveRole | '
   return 0;
 }
 
-export function hasRole(folder: DbFolder, userId: ObjectId, role: RecursiveRole) {
-  return compareRoles(folder.cache.userRecursiveRole[userId.toHexString()] ?? 'none', role) >= 0;
+export function hasRole(folder: DbFolder, user: DbUser, role: RecursiveRole) {
+  return compareRoles(folder.cache.userRecursiveRole[user.email] ?? 'none', role) >= 0;
 }

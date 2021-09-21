@@ -5,6 +5,7 @@ import { registerImageUpload } from './api/image-upload';
 import { registerImageDownload } from './api/get-image';
 import { DbManager } from '../database/database';
 import registerSwagger from './register-swagger';
+import { registerRules } from './api/rules';
 
 export interface ApiPluginOptions {
   dbManager: DbManager;
@@ -15,6 +16,7 @@ export async function ApiPlugin(apiInstance: FastifyInstance, { dbManager }: Api
   registerFolders(apiInstance, dbManager);
   registerImageUpload(apiInstance, dbManager);
   registerImageDownload(apiInstance, dbManager);
+  registerRules(apiInstance, dbManager);
   apiInstance.ready()
     .then(
       () => { apiInstance.swagger(); },

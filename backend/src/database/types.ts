@@ -47,16 +47,18 @@ export interface DbApiToken {
   createdOn: Date;
 }
 
-export type Role = 'viewer' | 'contributor' | 'editor' | 'admin';
-export type RecursiveRole = Role | 'owner';
+export const roles = <const>['viewer', 'contributor', 'editor', 'admin'];
+export const recursiveRoles = <const>['owner', ...roles];
+export type Role = (typeof roles)[number];
+export type RecursiveRole = (typeof recursiveRoles)[number];
 
 export interface DbFolderRule {
-  userId: ObjectId;
+  email: string;
   role: Role;
 }
 
 export interface DbFolderCache {
-  shareRootFor: ObjectId[];
+  shareRootFor: string[];
   userRecursiveRole: Record<string, RecursiveRole>;
 }
 
@@ -78,3 +80,10 @@ export interface DbChildFolder extends DbFolderCommon {
 }
 
 export type DbFolder = DbRootFolder | DbChildFolder;
+
+export interface DbInvitation {
+  _id: ObjectId;
+  folderId: ObjectId;
+  email: string;
+  role: Role;
+}
