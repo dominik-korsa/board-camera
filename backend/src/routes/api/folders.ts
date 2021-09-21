@@ -193,12 +193,10 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
     });
     if (!folder) throw apiInstance.httpErrors.notFound('Folder not found');
     if (!hasRole(folder, user, 'viewer')) throw apiInstance.httpErrors.forbidden();
-    let isRootAndOwner: boolean;
+    let isRootAndOwner = false;
     let parentFolderShortId: string | null = null;
-    if (folder.parentFolderId === null) {
-      isRootAndOwner = folder.ownerId.equals(user._id);
-    } else {
-      isRootAndOwner = false;
+    if (folder.parentFolderId === null) isRootAndOwner = folder.ownerId.equals(user._id);
+    else {
       const parentFolder = await dbManager.foldersCollection.findOne(folder.parentFolderId);
       if (parentFolder === null) throw apiInstance.httpErrors.internalServerError('Cannot find parent folder');
       if (parentFolder.cache.userRecursiveRole[user.email] !== undefined) {
@@ -259,5 +257,50 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
       },
     });
     return {};
+  });
+
+  const folderAncestorsReplySchema = Type.Object({
+    self: folderSchema,
+    ancestors: Type.Array(folderSchema, {
+      description: 'In order: parent, grandparent, great-grandparent (...)',
+    }),
+  });
+  type FolderAncestorsReply = Static<typeof folderAncestorsReplySchema>;
+  apiInstance.get<{
+    Params: FolderParams,
+    Reply: FolderAncestorsReply,
+  }>('/folders/:folderShortId/ancestors', {
+    schema: {
+      params: folderParamsSchema,
+      response: {
+        200: folderAncestorsReplySchema,
+      },
+      security: [
+        { apiTokenHeader: [] },
+        { sessionCookie: [] },
+      ],
+    },
+  }, async (request) => {
+    const user = await requireAuthentication(request, dbManager, true);
+    const folder = await dbManager.foldersCollection.findOne({
+      shortId: request.params.folderShortId,
+    });
+    if (!folder) throw apiInstance.httpErrors.notFound('Folder not found');
+    if (!hasRole(folder, user, 'viewer')) throw apiInstance.httpErrors.forbidden();
+
+    const ancestors: Folder[] = [];
+    let parentId = folder.parentFolderId;
+    while (parentId !== null) {
+      // eslint-disable-next-line no-await-in-loop
+      const parentFolder = await dbManager.foldersCollection.findOne(parentId);
+      if (parentFolder === null) throw apiInstance.httpErrors.internalServerError('Cannot find parent folder');
+      if (!hasRole(parentFolder, user, 'viewer')) break;
+      ancestors.push(mapFolder(parentFolder));
+      parentId = parentFolder.parentFolderId;
+    }
+    return {
+      self: mapFolder(folder),
+      ancestors,
+    };
   });
 }
