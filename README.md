@@ -5,7 +5,6 @@
 #### Environment variables
 You can specify env variables in a `.env` file placed in the repo root
 ```dotenv
-STORAGE_LOCATION= # path to mount volume location
 BACKEND_PORT=5000
 BASE_URL=http://localhost:5000 # used for Google login redirect
 ```
