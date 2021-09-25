@@ -1,30 +1,22 @@
 import { FastifyInstance } from 'fastify';
-import { Static, Type } from '@sinclair/typebox';
-import { DbManager } from '../../database/database';
 import {
-  FolderParams, folderParamsSchema, nullable, recursiveRoleSchema, roleSchema,
-} from './common';
+  FolderParams, folderParamsSchema,
+  GetRuleItem,
+  GetRulesReply, getRulesReplySchema,
+  ModifyRulesBody, modifyRulesBodySchema, ModifyRulesReply,
+  modifyRulesReplySchema,
+} from 'board-camera-api-schemas';
+import { DbManager } from '../../database/database';
 import { requireAuthentication } from '../../guards';
 import { hasRole } from '../../rules';
 import { DbFolderRule } from '../../database/types';
 
 export function registerRules(apiInstance: FastifyInstance, dbManager: DbManager) {
-  const getRuleItemSchema = Type.Object({
-    email: Type.String({
-      format: 'idn-email',
-    }),
-    role: roleSchema,
-  });
-  type GetRuleItem = Static<typeof getRuleItemSchema>;
   const mapRule = (rule: DbFolderRule): GetRuleItem => ({
     email: rule.email,
     role: rule.role,
   });
 
-  const getRulesReplySchema = Type.Object({
-    rules: Type.Array(getRuleItemSchema),
-  });
-  type GetRulesReply = Static<typeof getRulesReplySchema>;
   apiInstance.get<{
     Params: FolderParams,
     Reply: GetRulesReply,
@@ -51,16 +43,6 @@ export function registerRules(apiInstance: FastifyInstance, dbManager: DbManager
     };
   });
 
-  const modifyRulesBodySchema = Type.Object({
-    changes: Type.Record(Type.String({
-      format: 'idn-email',
-    }), nullable(roleSchema)),
-  });
-  type ModifyRulesBody = Static<typeof modifyRulesBodySchema>;
-  const modifyRulesReplySchema = Type.Object({
-    viewerNewRole: nullable(recursiveRoleSchema),
-  });
-  type ModifyRulesReply = Static<typeof modifyRulesReplySchema>;
   apiInstance.patch<{
     Params: FolderParams,
     Body: ModifyRulesBody,

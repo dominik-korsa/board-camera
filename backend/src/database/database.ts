@@ -1,8 +1,9 @@
 import {
   ClientSession, Collection, Db, MongoClient,
 } from 'mongodb';
+import { RecursiveRole } from 'board-camera-api-schemas';
 import {
-  DbApiToken, DbFolder, DbFolderCache, DbImage, DbUser, RecursiveRole,
+  DbApiToken, DbFolder, DbFolderCache, DbImage, DbUser,
 } from './types';
 import { config } from '../config';
 import { compareRoles } from '../rules';

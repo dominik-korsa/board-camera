@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "board-camera-api-schemas": "file:../api-schemas",
     "core-js": "^3.6.5",
     "ky": "^0.28.5",
     "ky-universal": "^0.9.1",

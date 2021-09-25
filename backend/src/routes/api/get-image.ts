@@ -1,11 +1,11 @@
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import fse from 'fs-extra';
 import { Type } from '@sinclair/typebox';
+import { binarySchema, ImageParams, imageParamsSchema } from 'board-camera-api-schemas';
 import { requireAuthentication } from '../../guards';
 import { hasRole } from '../../rules';
 import { DbManager } from '../../database/database';
 import { DbCompressedImageSize } from '../../database/types';
-import { ImageParams, imageParamsSchema } from './common';
 
 export function registerImageDownload(apiInstance: FastifyInstance, dbManager: DbManager) {
   const getImage = async (request: FastifyRequest<{ Params: ImageParams }>) => {
@@ -57,9 +57,7 @@ export function registerImageDownload(apiInstance: FastifyInstance, dbManager: D
         ],
         produces: ['image/webp'],
         response: {
-          200: Type.String({
-            format: 'binary',
-          }),
+          200: binarySchema,
         },
       },
     }, async (request, reply) => {

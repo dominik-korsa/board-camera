@@ -2,19 +2,16 @@ import { FastifyInstance } from 'fastify';
 import { nanoid } from 'nanoid';
 import bcrypt from 'bcrypt';
 import { Static, Type } from '@sinclair/typebox';
+import {
+  EmptyReply, emptyReplySchema,
+  GenerateTokenBody, generateTokenBodySchema, GenerateTokenReply, generateTokenReplySchema,
+  listTokensReplySchema,
+  ListTokensReplySchema,
+} from 'board-camera-api-schemas';
 import { DbManager } from '../../database/database';
 import { requireAuthentication } from '../../guards';
-import { EmptyReply, emptyReplySchema } from './common';
 
 export function registerAPITokens(apiInstance: FastifyInstance, dbManager: DbManager) {
-  const generateTokenBodySchema = Type.Object({
-    name: Type.String(),
-  });
-  type GenerateTokenBody = Static<typeof generateTokenBodySchema>;
-  const generateTokenReplySchema = Type.Object({
-    token: Type.String(),
-  });
-  type GenerateTokenReply = Static<typeof generateTokenReplySchema>;
   apiInstance.post<{
     Body: GenerateTokenBody,
     Reply: GenerateTokenReply,
@@ -54,16 +51,6 @@ export function registerAPITokens(apiInstance: FastifyInstance, dbManager: DbMan
     }
   });
 
-  const listTokensReplySchema = Type.Object({
-    tokens: Type.Array(Type.Object({
-      tokenId: Type.String(),
-      name: Type.String(),
-      createdOn: Type.String({
-        format: 'date-time',
-      }),
-    })),
-  });
-  type ListTokensReplySchema = Static<typeof listTokensReplySchema>;
   apiInstance.get<{
     Reply: ListTokensReplySchema,
   }>('/api-tokens/list', {

@@ -1,8 +1,8 @@
 import { reactive } from 'vue';
-import { ApiViewer } from 'src/api/types';
+import { Viewer } from 'board-camera-api-schemas';
 
 export default reactive<{
-  signedInUser: ApiViewer | null,
+  signedInUser: Viewer | null,
 }>({
   signedInUser: null,
 });

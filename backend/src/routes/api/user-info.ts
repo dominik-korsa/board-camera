@@ -1,17 +1,10 @@
 import { FastifyInstance } from 'fastify';
-import { Static, Type } from '@sinclair/typebox';
+import { GetViewerReply, getViewerReplySchema } from 'board-camera-api-schemas';
 import { DbManager } from '../../database/database';
-import { nullable } from './common';
 import { getAuthenticatedUser } from '../../guards';
 import { getUserInfo } from '../../auth-utils';
 
 export function registerUserInfo(apiInstance: FastifyInstance, dbManager: DbManager) {
-  const getViewerReplySchema = nullable(Type.Object({
-    name: Type.String(),
-    email: Type.String(),
-    avatarUrl: Type.String(),
-  }));
-  type GetViewerReply = Static<typeof getViewerReplySchema>;
   apiInstance.get<{
     Reply: GetViewerReply,
   }>('/viewer', {

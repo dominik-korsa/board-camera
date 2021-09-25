@@ -2,8 +2,8 @@
   "dependencies": {
     "@sinclair/typebox": "^0.20.5",
     "bcrypt": "^5.0.1",
+    "board-camera-api-schemas": "file:../api-schemas",
     "busboy": "^0.3.1",
-    "eslint-config-airbnb-base": "^14.2.1",
     "fastify": "^3.21.0",
     "fastify-http-proxy": "github:dominik-korsa/fastify-http-proxy#constraints",
     "fastify-secure-session": "^2.3.1",
@@ -29,7 +29,7 @@
     "build": "tsc",
     "start": "node ."
   },
-  "author": "",
+  "author": "Dominik Korsa <dominik.korsa@gmail.com>",
   "license": "MIT",
   "description": "",
   "devDependencies": {
@@ -41,6 +41,8 @@
     "@types/sharp": "^0.29.2",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-airbnb-typescript": "^14.0.0",
     "find-my-way": "^4.3.3",
     "typescript": "^4.4.2"

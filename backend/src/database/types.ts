@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb';
+import { RecursiveRole, Role } from 'board-camera-api-schemas';
 
 export interface Pos {
   x: number;
@@ -46,11 +47,6 @@ export interface DbApiToken {
   name: string;
   createdOn: Date;
 }
-
-export const roles = <const>['viewer', 'contributor', 'editor', 'admin'];
-export const recursiveRoles = <const>['owner', ...roles];
-export type Role = (typeof roles)[number];
-export type RecursiveRole = (typeof recursiveRoles)[number];
 
 export interface DbFolderRule {
   email: string;

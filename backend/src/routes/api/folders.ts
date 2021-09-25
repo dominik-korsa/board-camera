@@ -1,20 +1,27 @@
 import { FastifyInstance } from 'fastify';
 import { nanoid } from 'nanoid';
-import { Static, Type } from '@sinclair/typebox';
 import { WithoutId } from 'mongodb';
+import {
+  CreateFolderBody,
+  createFolderBodySchema, CreateFolderReply, createFolderReplySchema,
+  EmptyReply,
+  emptyReplySchema,
+  Folder,
+  FolderAncestorsReply,
+  folderAncestorsReplySchema,
+  FolderInfoReply, folderInfoReplySchema,
+  FolderParams,
+  folderParamsSchema,
+  Image,
+  ListUserFoldersReply, listUserFoldersReplySchema,
+  RenameFolderBody,
+  renameFolderBodySchema,
+} from 'board-camera-api-schemas';
 import { DbManager } from '../../database/database';
 import { requireAuthentication } from '../../guards';
 import { DbChildFolder, DbFolder, DbRootFolder } from '../../database/types';
 import { hasRole } from '../../rules';
-import {
-  EmptyReply, emptyReplySchema, FolderParams, folderParamsSchema, recursiveRoleSchema,
-} from './common';
 
-const folderSchema = Type.Object({
-  shortId: Type.String(),
-  name: Type.String(),
-});
-type Folder = Static<typeof folderSchema>;
 function mapFolder(folder: DbFolder): Folder {
   return {
     name: folder.name,
@@ -23,14 +30,6 @@ function mapFolder(folder: DbFolder): Folder {
 }
 
 export default function registerFolders(apiInstance: FastifyInstance, dbManager: DbManager) {
-  const createFolderBodySchema = Type.Object({
-    name: Type.String(),
-  });
-  type CreateFolderBody = Static<typeof createFolderBodySchema>;
-  const createFolderReplySchema = Type.Object({
-    shortId: Type.String(),
-  });
-  type CreateFolderReply = Static<typeof createFolderReplySchema>;
   apiInstance.post<{
     Body: CreateFolderBody,
     Reply: CreateFolderReply,
@@ -121,11 +120,6 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
     };
   });
 
-  const listUserFoldersReplySchema = Type.Object({
-    ownedFolders: Type.Array(folderSchema),
-    sharedFolders: Type.Array(folderSchema),
-  });
-  type ListUserFoldersReply = Static<typeof listUserFoldersReplySchema>;
   apiInstance.get<{
     Reply: ListUserFoldersReply,
   }>('/list-user-folders', {
@@ -153,24 +147,6 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
     };
   });
 
-  const imageSchema = Type.Object({
-    shortId: Type.String(),
-    capturedOn: Type.String({
-      format: 'date',
-    }),
-  });
-  type Image = Static<typeof imageSchema>;
-  const folderInfoReplySchema = Type.Object({
-    subfolders: Type.Array(folderSchema),
-    images: Type.Array(imageSchema),
-    name: Type.String(),
-    parentFolderShortId: Type.Union([Type.String(), Type.Null()]),
-    viewer: Type.Object({
-      isRootAndOwner: Type.Boolean(),
-      role: recursiveRoleSchema,
-    }),
-  });
-  type FolderInfoReply = Static<typeof folderInfoReplySchema>;
   apiInstance.get<{
     Params: FolderParams,
     Reply: FolderInfoReply,
@@ -223,10 +199,6 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
     };
   });
 
-  const renameFolderBodySchema = Type.Object({
-    name: Type.String(),
-  });
-  type RenameFolderBody = Static<typeof renameFolderBodySchema>;
   apiInstance.patch<{
     Params: FolderParams,
     Body: RenameFolderBody,
@@ -258,13 +230,6 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
     return {};
   });
 
-  const folderAncestorsReplySchema = Type.Object({
-    self: folderSchema,
-    ancestors: Type.Array(folderSchema, {
-      description: 'In order: parent, grandparent, great-grandparent (...)',
-    }),
-  });
-  type FolderAncestorsReply = Static<typeof folderAncestorsReplySchema>;
   apiInstance.get<{
     Params: FolderParams,
     Reply: FolderAncestorsReply,

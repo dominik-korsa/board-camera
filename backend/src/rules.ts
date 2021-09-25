@@ -1,4 +1,5 @@
-import { DbFolder, DbUser, RecursiveRole } from './database/types';
+import { RecursiveRole } from 'board-camera-api-schemas';
+import { DbFolder, DbUser } from './database/types';
 
 export const rolePreference: Record<RecursiveRole | 'none', number> = {
   none: 0,

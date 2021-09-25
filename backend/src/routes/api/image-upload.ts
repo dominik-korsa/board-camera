@@ -1,9 +1,14 @@
-import { Static, Type } from '@sinclair/typebox';
 import path from 'path';
 import { nanoid } from 'nanoid';
 import fse from 'fs-extra';
 import { FastifyInstance } from 'fastify';
 import sharp from 'sharp';
+import {
+  FolderParams,
+  folderParamsSchema,
+  UploadImageBody, uploadImageBodySchema, UploadImageReply,
+  uploadImageReplySchema,
+} from 'board-camera-api-schemas';
 import { requireAuthentication } from '../../guards';
 import { mapObject } from '../../utils';
 import { hasRole } from '../../rules';
@@ -11,19 +16,8 @@ import { config } from '../../config';
 import analyseImage from '../../analyse';
 import { DbManager } from '../../database/database';
 import { DbImageBoard } from '../../database/types';
-import { FolderParams, folderParamsSchema } from './common';
 
 export function registerImageUpload(apiInstance: FastifyInstance, dbManager: DbManager) {
-  const uploadImageBodySchema = Type.Object({
-    capturedOn: Type.String({
-      format: 'date',
-    }),
-  });
-  type UploadImageBody = Static<typeof uploadImageBodySchema>;
-  const uploadImageReplySchema = Type.Object({
-    shortId: Type.String(),
-  });
-  type UploadImageReply = Static<typeof uploadImageReplySchema>;
   apiInstance.post<{
     Body: UploadImageBody,
     Params: FolderParams,
