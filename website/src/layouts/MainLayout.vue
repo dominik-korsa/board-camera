@@ -1,8 +1,9 @@
 <template>
   <div
     v-if="signedInUser === null"
-    class="fullscreen bg-primary text-white text-center q-pa-md flex flex-center"
+    class="fullscreen bg-primary text-white text-center q-pa-md flex flex-center column"
   >
+    <h4>{{ $t('appName') }}</h4>
     <q-btn
       color="white"
       text-color="black"
@@ -25,21 +26,17 @@
         />
 
         <q-toolbar-title>
-          Quasar App
+          {{ $t('appName') }}
         </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
         <q-btn round>
           <q-avatar size="40px">
             <img :src="signedInUser.avatarUrl" :alt="signedInUser.name">
           </q-avatar>
-          <q-menu anchor="bottom right" self="top right">
-            <q-list>
-              <q-item href="/auth/sign-out" clickable tag="a">
-                <q-item-section>{{ $t('signOut') }}</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
+          <account-menu />
+          <q-tooltip>
+            {{ $t('account') }}
+          </q-tooltip>
         </q-btn>
       </q-toolbar>
     </q-header>
@@ -72,6 +69,7 @@
 
 <script lang="ts">
 import EssentialLink from 'components/EssentialLink.vue';
+import AccountMenu from 'components/AccountMenu.vue';
 
 const linksList = [
   {
@@ -126,6 +124,7 @@ export default defineComponent({
 
   components: {
     EssentialLink,
+    AccountMenu,
   },
 
   setup() {
