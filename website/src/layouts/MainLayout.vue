@@ -1,5 +1,18 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <div
+    v-if="signedInUser === null"
+    class="fullscreen bg-primary text-white text-center q-pa-md flex flex-center"
+  >
+    <q-btn
+      color="white"
+      text-color="black"
+      type="a"
+      href="/auth/sign-in/google"
+    >
+      {{ $t('signIn.google') }}
+    </q-btn>
+  </div>
+  <q-layout view="lHh Lpr lFf" v-else>
     <q-header elevated>
       <q-toolbar>
         <q-btn
@@ -16,6 +29,18 @@
         </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
+        <q-btn round>
+          <q-avatar size="40px">
+            <img :src="signedInUser.avatarUrl" :alt="signedInUser.name">
+          </q-avatar>
+          <q-menu anchor="bottom right" self="top right">
+            <q-list>
+              <q-item href="/auth/sign-out" clickable tag="a">
+                <q-item-section>{{ $t('signOut') }}</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
       </q-toolbar>
     </q-header>
 
@@ -94,6 +119,7 @@ const linksList = [
 ];
 
 import { defineComponent, ref } from 'vue';
+import state from 'src/state';
 
 export default defineComponent({
   name: 'MainLayout',
@@ -111,6 +137,7 @@ export default defineComponent({
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
+      signedInUser: state.signedInUser,
     };
   },
 });

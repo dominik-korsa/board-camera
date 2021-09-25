@@ -9,7 +9,7 @@ export function registerUserInfo(apiInstance: FastifyInstance, dbManager: DbMana
   const getViewerReplySchema = nullable(Type.Object({
     name: Type.String(),
     email: Type.String(),
-    avatarURL: Type.String(),
+    avatarUrl: Type.String(),
   }));
   type GetViewerReply = Static<typeof getViewerReplySchema>;
   apiInstance.get<{
@@ -27,7 +27,7 @@ export function registerUserInfo(apiInstance: FastifyInstance, dbManager: DbMana
     return {
       email: authenticatedUser.user.email,
       name: userInfo.name,
-      avatarURL: userInfo.picture,
+      avatarUrl: userInfo.picture,
     };
   });
 }
