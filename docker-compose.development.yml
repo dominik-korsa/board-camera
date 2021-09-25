@@ -4,7 +4,7 @@ services:
     cap_add: [ 'NET_ADMIN', 'NET_RAW' ]
     environment:
       PORTS: 80:5002
-    restart: on-failure
+    restart: always
   backend:
     build:
       target: development

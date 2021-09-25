@@ -20,9 +20,21 @@ You can generate one using this command:
 ```
 Please see this if you are using windows: https://github.com/fastify/fastify-secure-session/issues/87
 
-### Running
+### Development
+Start Quasar dev mode:
+```shell
+cd website
+npm run dev
+```
+Start server:
 ```shell
 docker compose up -f ./docker-compose.yml -f ./docker-compose.development.yml -d
+```
+Your local Quasar development server (running on port 5002) will be proxied by the backend server. This way you can take advantage of hot reload, while the API is on the same port (needed mainly for cookies).
+
+### Production
+```shell
+docker compose up -f ./docker-compose.yml -f ./docker-compose.production.yml -d
 ```
 
 ## Docs

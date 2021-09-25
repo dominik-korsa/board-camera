@@ -22,7 +22,7 @@ COPY website /app
 RUN npm run build
 
 FROM base AS production
-COPY --from="build-website" /app/dist /data/website
+COPY --from="build-website" /app/dist/spa /data/website
 ENV SERVER_MODE=production
 
 FROM base AS development
