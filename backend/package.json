@@ -5,8 +5,10 @@
     "busboy": "^0.3.1",
     "eslint-config-airbnb-base": "^14.2.1",
     "fastify": "^3.21.0",
+    "fastify-http-proxy": "github:dominik-korsa/fastify-http-proxy#constraints",
     "fastify-secure-session": "^2.3.1",
     "fastify-sensible": "^3.1.1",
+    "fastify-static": "^4.2.3",
     "fastify-swagger": "^4.12.0",
     "form-data": "^4.0.0",
     "fs-extra": "^10.0.0",
@@ -19,6 +21,7 @@
   "name": "board-camera-backend",
   "version": "1.0.0",
   "main": "dist/index.js",
+  "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint -c .eslintrc.yml --ext .ts src/**",
@@ -39,6 +42,7 @@
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
     "eslint-config-airbnb-typescript": "^14.0.0",
+    "find-my-way": "^4.3.3",
     "typescript": "^4.4.2"
   }
 }

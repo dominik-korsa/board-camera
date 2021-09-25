@@ -1,19 +1,25 @@
-import fastify, { FastifyRequest } from 'fastify';
+import fastify from 'fastify';
 import FastifySensible from 'fastify-sensible';
-import { IncomingMessage } from 'http';
 import FastifySecureSession from 'fastify-secure-session';
 import fsPromises from 'fs/promises';
-import fs from 'fs';
-import path from 'path';
 import { parseMultipart } from './utils';
 import { connectDb } from './database/database';
-import registerAuth from './routes/auth';
+import { AuthPlugin } from './routes/auth';
 import { config } from './config';
 import { ApiPlugin } from './routes/register-api';
+import { getProxyConstraint, WebsitePlugin } from './routes/register-website';
 
 async function main() {
   const dbManager = await connectDb();
-  const server = fastify({ logger: true });
+  const server = fastify({
+    logger: true,
+    constraints: {
+      website: getProxyConstraint('website', [
+        '/api',
+        '/auth',
+      ]),
+    },
+  });
   server.register(FastifySensible);
   server.register(FastifySecureSession, {
     key: await fsPromises.readFile('/run/secrets/session-key'),
@@ -25,7 +31,7 @@ async function main() {
     },
   });
   server.decorateRequest('files', null);
-  server.addContentTypeParser('multipart/form-data', (request: FastifyRequest, payload: IncomingMessage, done) => {
+  server.addContentTypeParser('multipart/form-data', (request, payload, done) => {
     parseMultipart(request, payload)
       .then((result) => {
         request.files = result.files;
@@ -47,20 +53,16 @@ async function main() {
 
   server.log.info('DB connected');
   await dbManager.updateAllFolderCaches();
-  await registerAuth(server, dbManager);
+  server.register(AuthPlugin, {
+    prefix: '/auth',
+    dbManager,
+  });
   server.register(ApiPlugin, {
     prefix: '/api',
     dbManager,
   });
-  server.get('/', (request, reply) => {
-    reply.type('text/html');
-    if (request.session.get('user-id') === undefined) {
-      reply.send('<a href="/auth/sign-in/google">Sign in with google</a>');
-    } reply.send('<a href="/auth/sign-out">Sign out</a>');
-  });
-  server.get('/upload-test', (request, reply) => {
-    const filePath = path.resolve('./static/upload-test.html');
-    reply.type('text/html').send(fs.createReadStream(filePath));
+  server.register(WebsitePlugin, {
+    constraintName: 'website',
   });
   await server.listen(config.port, '0.0.0.0');
   server.log.info('Fastify ready');

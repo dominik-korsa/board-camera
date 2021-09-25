@@ -42,7 +42,8 @@ export default function registerSwagger(server: FastifyInstance) {
         },
       },
     },
-    transform: (schema: FastifySchema): FastifySchema => {
+    transform: (schema?: FastifySchema): FastifySchema | undefined => {
+      if (schema === undefined) return undefined;
       let newBody: JSONSchema7 | undefined;
       if (typeof schema.body === 'object' && schema.body !== null) {
         newBody = { ...schema.body };

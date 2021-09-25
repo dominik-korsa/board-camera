@@ -17,6 +17,7 @@ export async function ApiPlugin(apiInstance: FastifyInstance, { dbManager }: Api
   registerImageUpload(apiInstance, dbManager);
   registerImageDownload(apiInstance, dbManager);
   registerRules(apiInstance, dbManager);
+
   apiInstance.ready()
     .then(
       () => { apiInstance.swagger(); },

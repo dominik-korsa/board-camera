@@ -80,10 +80,3 @@ export interface DbChildFolder extends DbFolderCommon {
 }
 
 export type DbFolder = DbRootFolder | DbChildFolder;
-
-export interface DbInvitation {
-  _id: ObjectId;
-  folderId: ObjectId;
-  email: string;
-  role: Role;
-}

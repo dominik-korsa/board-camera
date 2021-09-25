@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   backend:
-    build: backend
+    build: .
     environment:
       - PORT=80
       - BASE_URL
@@ -19,8 +19,10 @@ services:
     image: mongo
     volumes:
       - board-camera-db:/data/db
+    restart: on-failure
   transformer:
     build: transformer
+    restart: on-failure
 secrets:
   session-key:
     file: session-key

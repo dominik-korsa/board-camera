@@ -6,6 +6,7 @@ export const config = {
   mongodbUrl: 'mongodb://mongodb:27017/board-camera',
   storagePath: '/data/images',
   baseUrl: requireEnv('BASE_URL'),
+  development: requireEnv('SERVER_MODE') === 'development',
 };
 
 export interface GoogleKeys {
