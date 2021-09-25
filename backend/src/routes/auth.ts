@@ -1,19 +1,14 @@
 import { FastifyInstance } from 'fastify';
-import { GenerateAuthUrlOpts, OAuth2Client } from 'google-auth-library';
+import { GenerateAuthUrlOpts } from 'google-auth-library';
 import { ObjectId } from 'mongodb';
 import { DbManager } from '../database/database';
-import { config, getGoogleKeys } from '../config';
+import { getAuthClient } from '../auth-utils';
 
 export interface AuthPluginOptions {
   dbManager: DbManager;
 }
 export async function AuthPlugin(authInstance: FastifyInstance, { dbManager }: AuthPluginOptions) {
-  const keys = await getGoogleKeys();
-  const client = new OAuth2Client(
-    keys.web.client_id,
-    keys.web.client_secret,
-    new URL('/auth/google-callback', config.baseUrl).toString(),
-  );
+  const client = await getAuthClient();
 
   const generateAuthUrl = (retry: boolean, sub?: string) => {
     const opts: GenerateAuthUrlOpts = {

@@ -23,11 +23,14 @@ export async function getAndVerifyApiToken(
   return apiToken;
 }
 
-export async function requireAuthentication(
+export async function getAuthenticatedUser(
   request: FastifyRequest,
   dbManager: DbManager,
   allowToken: boolean,
-): Promise<DbUser> {
+): Promise<{
+    user: DbUser,
+    isToken: boolean,
+  } | null> {
   let rawToken = request.headers['x-api-token'];
   if (Array.isArray(rawToken)) [rawToken] = rawToken;
   if (rawToken) {
@@ -41,14 +44,30 @@ export async function requireAuthentication(
     }
     const user = await dbManager.usersCollection.findOne(apiToken.ownerId);
     if (user === null) throw request.server.httpErrors.unauthorized();
-    return user;
+    return {
+      user,
+      isToken: true,
+    };
   }
   const userId: string = request.session.get('user-id');
-  if (!userId) throw request.server.httpErrors.unauthorized();
+  if (!userId) return null;
   const user = await dbManager.usersCollection.findOne(ObjectId.createFromHexString(userId));
   if (!user) {
     request.session.set('user-id', undefined);
-    throw request.server.httpErrors.unauthorized();
+    return null;
   }
-  return user;
+  return {
+    user,
+    isToken: false,
+  };
+}
+
+export async function requireAuthentication(
+  request: FastifyRequest,
+  dbManager: DbManager,
+  allowToken: boolean,
+): Promise<DbUser> {
+  const authenticatedUser = await getAuthenticatedUser(request, dbManager, allowToken);
+  if (authenticatedUser === null) throw request.server.httpErrors.unauthorized();
+  return authenticatedUser.user;
 }
