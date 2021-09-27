@@ -1,4 +1,4 @@
-import { Static, Type } from '@sinclair/typebox';
+import { Static, StringOptions, Type } from '@sinclair/typebox';
 import { recursiveRoles, roles } from './data';
 
 export const folderParamsSchema = Type.Object({
@@ -23,3 +23,11 @@ export const recursiveRoleSchema = Type.Union(recursiveRoles.map((x) => Type.Lit
 export const binarySchema = Type.String({
   format: 'binary',
 });
+export function trimmedStringSchema<TFormat extends string>(
+  options: StringOptions<TFormat> = {},
+) {
+  return Type.String({
+    pattern: /^\S(.*\S)?$/.toString(),
+    ...options,
+  });
+}

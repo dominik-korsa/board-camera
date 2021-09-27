@@ -1,7 +1,11 @@
 import { Static, Type } from '@sinclair/typebox';
+import { trimmedStringSchema } from '../common';
 
+const tokenNameSchema = trimmedStringSchema({
+  maxLength: 64,
+});
 export const generateTokenBodySchema = Type.Object({
-  name: Type.String(),
+  name: tokenNameSchema,
 });
 export type GenerateTokenBody = Static<typeof generateTokenBodySchema>;
 export const generateTokenReplySchema = Type.Object({

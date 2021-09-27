@@ -1,19 +1,20 @@
 import { Static, Type } from '@sinclair/typebox';
-import { recursiveRoleSchema } from '../common';
+import { recursiveRoleSchema, trimmedStringSchema } from '../common';
 
 export const folderSchema = Type.Object({
   shortId: Type.String(),
   name: Type.String(),
 });
 export type Folder = Static<typeof folderSchema>;
+const folderNameSchema = trimmedStringSchema({
+  maxLength: 64,
+});
 
 export const createFolderBodySchema = Type.Object({
-  name: Type.String(),
+  name: folderNameSchema,
 });
 export type CreateFolderBody = Static<typeof createFolderBodySchema>;
-export const createFolderReplySchema = Type.Object({
-  shortId: Type.String(),
-});
+export const createFolderReplySchema = folderSchema;
 export type CreateFolderReply = Static<typeof createFolderReplySchema>;
 
 export const listUserFoldersReplySchema = Type.Object({
@@ -42,7 +43,7 @@ export const folderInfoReplySchema = Type.Object({
 export type FolderInfoReply = Static<typeof folderInfoReplySchema>;
 
 export const renameFolderBodySchema = Type.Object({
-  name: Type.String(),
+  name: folderNameSchema,
 });
 export type RenameFolderBody = Static<typeof renameFolderBodySchema>;
 

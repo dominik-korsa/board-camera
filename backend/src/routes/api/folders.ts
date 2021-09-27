@@ -51,13 +51,14 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
       shortId = nanoid(10);
       // eslint-disable-next-line no-await-in-loop
     } while ((await dbManager.foldersCollection.findOne({ shortId })) !== null);
+    const name = request.body.name.trim();
     await dbManager.withTransaction(async () => {
       const newFolder: WithoutId<DbRootFolder> = {
         parentFolderId: null,
         ownerId: user._id,
         rules: [],
         shortId,
-        name: request.body.name.trim(),
+        name,
         cache: {
           userRecursiveRole: {},
           shareRootFor: [],
@@ -69,6 +70,7 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
     });
     return {
       shortId,
+      name,
     };
   });
 
@@ -100,12 +102,13 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
       shortId = nanoid(10);
       // eslint-disable-next-line no-await-in-loop
     } while ((await dbManager.foldersCollection.findOne({ shortId })) !== null);
+    const name = request.body.name.trim();
     await dbManager.withTransaction(async () => {
       const newFolder: WithoutId<DbChildFolder> = {
         parentFolderId: folder._id,
         rules: [],
         shortId,
-        name: request.body.name.trim(),
+        name,
         cache: {
           userRecursiveRole: {},
           shareRootFor: [],
@@ -117,6 +120,7 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
     });
     return {
       shortId,
+      name,
     };
   });
 
