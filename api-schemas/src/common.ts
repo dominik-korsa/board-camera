@@ -27,7 +27,7 @@ export function trimmedStringSchema<TFormat extends string>(
   options: StringOptions<TFormat> = {},
 ) {
   return Type.String({
-    pattern: /^\S(.*\S)?$/.toString(),
+    pattern: '^\\S(.*\\S)?$',
     ...options,
   });
 }

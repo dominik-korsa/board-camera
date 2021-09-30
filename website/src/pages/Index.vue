@@ -1,11 +1,21 @@
 <template>
   <q-page class="row items-center justify-evenly column">
-    <q-list bordered class="rounded-borders folders-list">
-      <q-item-label header>{{ $t('yourFolders') }}</q-item-label>
+    <q-list
+      bordered
+      class="rounded-borders folders-list"
+    >
+      <q-item-label header>
+        {{ $t('yourFolders') }}
+      </q-item-label>
       <folder-skeleton v-if="userFolders === null" />
       <template v-else>
-        <div class="text-center q-py-lg" v-if="userFolders.ownedFolders.length === 0">
-          <div class="text-subtitle1">{{ $t('noFolders') }}</div>
+        <div
+          v-if="userFolders.ownedFolders.length === 0"
+          class="text-center q-py-lg"
+        >
+          <div class="text-subtitle1">
+            {{ $t('noFolders') }}
+          </div>
         </div>
         <folder-item
           v-for="folder in userFolders.ownedFolders"
@@ -13,18 +23,29 @@
           :folder="folder"
         />
         <div class="q-ma-sm">
-          <q-btn class="full-width" color="primary" outline>
+          <q-btn
+            class="full-width"
+            color="primary"
+            outline
+          >
             Create folder
-            <create-folder-menu />
+            <create-folder-menu @created="onCreated" />
           </q-btn>
         </div>
       </template>
       <q-separator />
-      <q-item-label header>{{ $t('sharedFolders') }}</q-item-label>
+      <q-item-label header>
+        {{ $t('sharedFolders') }}
+      </q-item-label>
       <folder-skeleton v-if="userFolders === null" />
       <template v-else>
-        <div class="text-center q-py-lg" v-if="userFolders.sharedFolders.length === 0">
-          <div class="text-subtitle1">{{ $t('noFolders') }}</div>
+        <div
+          v-if="userFolders.sharedFolders.length === 0"
+          class="text-center q-py-lg"
+        >
+          <div class="text-subtitle1">
+            {{ $t('noFolders') }}
+          </div>
         </div>
         <folder-item
           v-for="folder in userFolders.sharedFolders"
@@ -42,7 +63,7 @@ import {
   defineComponent, onMounted, ref,
 } from 'vue';
 import { listUserFolders } from 'src/api';
-import { ListUserFoldersReply } from 'board-camera-api-schemas';
+import { CreateFolderReply, ListUserFoldersReply } from 'board-camera-api-schemas';
 import FolderItem from 'components/FolderItem.vue';
 import FolderSkeleton from 'components/FolderSkeleton.vue';
 import CreateFolderMenu from 'components/CreateFolderMenu.vue';
@@ -61,6 +82,9 @@ export default defineComponent({
     });
     return {
       userFolders,
+      onCreated(reply: CreateFolderReply) {
+        userFolders.value?.ownedFolders?.push(reply);
+      },
     };
   },
 });

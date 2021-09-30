@@ -16,5 +16,5 @@ export function listUserFolders() {
 
 export function createRootFolder(name: string) {
   const body: CreateFolderBody = { name };
-  return ky.get('/api/create-root-folder', { json: body }).json<CreateFolderReply>();
+  return ky.post('/api/create-root-folder', { json: body }).json<CreateFolderReply>();
 }

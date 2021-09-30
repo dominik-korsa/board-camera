@@ -1,11 +1,23 @@
 <template>
-  <q-item clickable v-ripple>
-    <q-item-section avatar top>
-      <q-avatar :icon="icon" color="primary" text-color="white" />
+  <q-item
+    v-ripple
+    clickable
+  >
+    <q-item-section
+      avatar
+      top
+    >
+      <q-avatar
+        :icon="icon"
+        color="primary"
+        text-color="white"
+      />
     </q-item-section>
 
     <q-item-section>
-      <q-item-label lines="1">{{ folder.name }}</q-item-label>
+      <q-item-label lines="1">
+        {{ folder.name }}
+      </q-item-label>
     </q-item-section>
   </q-item>
 </template>

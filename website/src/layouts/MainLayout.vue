@@ -13,7 +13,10 @@
       {{ $t('signIn.google') }}
     </q-btn>
   </div>
-  <q-layout view="lHh Lpr lFf" v-else>
+  <q-layout
+    v-else
+    view="lHh Lpr lFf"
+  >
     <q-header elevated>
       <q-toolbar>
         <q-btn
@@ -31,7 +34,10 @@
 
         <q-btn round>
           <q-avatar size="40px">
-            <img :src="signedInUser.avatarUrl" :alt="signedInUser.name">
+            <img
+              :src="signedInUser.avatarUrl"
+              :alt="signedInUser.name"
+            >
           </q-avatar>
           <account-menu />
           <q-tooltip>

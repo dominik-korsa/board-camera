@@ -1,5 +1,8 @@
 <template>
-  <q-menu anchor="bottom right" self="top right">
+  <q-menu
+    anchor="bottom right"
+    self="top right"
+  >
     <q-card class="account-menu__card">
       <q-card-section>
         <div class="text-h5 text-center">
@@ -11,7 +14,13 @@
       </q-card-section>
       <q-separator />
       <q-card-actions>
-        <q-btn type="a" href="/auth/sign-out" flat class="full-width" color="primary">
+        <q-btn
+          type="a"
+          href="/auth/sign-out"
+          flat
+          class="full-width"
+          color="primary"
+        >
           {{ $t('signOut') }}
         </q-btn>
       </q-card-actions>
