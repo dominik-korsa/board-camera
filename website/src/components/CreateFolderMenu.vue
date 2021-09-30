@@ -4,7 +4,7 @@
     fit
     :offset="[0, 8]"
     :persistent="creating"
-    :auto-close="false"
+    no-refocus
   >
     <q-form @submit.prevent="createRootFolderSubmit">
       <q-card>
@@ -38,14 +38,29 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+import {
+  computed, defineComponent, PropType, ref,
+} from 'vue';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
-import { createRootFolder } from 'src/api';
+import { createRootFolder, createSubfolder } from 'src/api';
 import { getTypeValidator } from 'src/utils';
 import { CreateFolderReply } from 'board-camera-api-schemas';
 
+function createFolder(name: string, parentFolderId?: string) {
+  return (parentFolderId === undefined
+    ? createRootFolder(name)
+    : createSubfolder(name, parentFolderId));
+}
+
 export default defineComponent({
+  props: {
+    parentFolderId: {
+      type: String as PropType<string>,
+      required: false,
+      default: undefined,
+    },
+  },
   emits: {
     created: getTypeValidator<CreateFolderReply>(),
   },
@@ -65,7 +80,7 @@ export default defineComponent({
         if (disabled.value) return;
         creating.value = true;
         try {
-          const result = await createRootFolder(name.value.trim());
+          const result = await createFolder(name.value.trim(), props.parentFolderId);
           show.value = false;
           name.value = '';
           emit('created', result);

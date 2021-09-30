@@ -8,10 +8,14 @@ export default {
   yourFolders: 'Your folders',
   sharedFolders: 'Shared folders',
   noFolders: 'No folders',
+  subfolders: 'Subfolders',
   createFolder: {
     title: 'Create folder',
     name: 'Name',
     button: 'Create',
     error: 'Failed to create folder',
   },
+  createSubfolder: 'Create subfolder',
+  sharing: 'Sharing',
+  otherOptions: 'Other options',
 };

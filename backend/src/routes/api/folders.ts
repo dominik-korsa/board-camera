@@ -185,6 +185,7 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
     const subfolders = await dbManager.foldersCollection.find({
       parentFolderId: folder._id,
     }).map(mapFolder).toArray();
+    // TODO: Extract images to another route
     const images = await dbManager.imagesCollection.find({
       folderId: folder._id,
     }).map((image): Image => ({
@@ -269,6 +270,7 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
     return {
       self: mapFolder(folder),
       ancestors,
+      isOwner: hasRole(folder, user, 'owner'),
     };
   });
 }

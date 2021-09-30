@@ -12,6 +12,7 @@
     "build": "quasar build"
   },
   "dependencies": {
+    "@intlify/eslint-plugin-vue-i18n": "^0.15.0",
     "@quasar/extras": "^1.0.0",
     "board-camera-api-schemas": "file:../api-schemas",
     "core-js": "^3.6.5",

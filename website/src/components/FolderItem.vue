@@ -2,6 +2,7 @@
   <q-item
     v-ripple
     clickable
+    :to="`/folders/${folder.shortId}`"
   >
     <q-item-section
       avatar

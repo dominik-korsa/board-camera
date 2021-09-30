@@ -52,5 +52,6 @@ export const folderAncestorsReplySchema = Type.Object({
   ancestors: Type.Array(folderSchema, {
     description: 'In order: parent, grandparent, great-grandparent (...)',
   }),
+  isOwner: Type.Boolean(),
 });
 export type FolderAncestorsReply = Static<typeof folderAncestorsReplySchema>;
