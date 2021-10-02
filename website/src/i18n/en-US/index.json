@@ -31,5 +31,7 @@
     "close": "Close menu",
     "removeUploaded": "Remove uploaded files"
   },
-  "close": "Close"
+  "close": "Close",
+  "images": "Images",
+  "noImages": "No images"
 }

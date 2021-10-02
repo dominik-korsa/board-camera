@@ -39,6 +39,9 @@ export const imageSchema = Type.Object({
   capturedOn: Type.String({
     format: 'date',
   }),
+  uploadedOn: Type.String({
+    format: 'date-time',
+  }),
 });
 export type Image = Static<typeof imageSchema>;
 export const folderImagesReplySchema = Type.Object({

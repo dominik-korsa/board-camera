@@ -6,7 +6,9 @@ import sharp from 'sharp';
 import {
   FolderParams,
   folderParamsSchema,
-  UploadImageBody, uploadImageBodySchema, UploadImageReply,
+  UploadImageBody,
+  uploadImageBodySchema,
+  UploadImageReply,
   uploadImageReplySchema,
 } from 'board-camera-api-schemas';
 import { requireAuthentication } from '../../guards';
@@ -66,7 +68,7 @@ export function registerImageUpload(apiInstance: FastifyInstance, dbManager: DbM
           .resize({
             width,
             height,
-            fit: 'outside',
+            fit: 'inside',
             withoutEnlargement: true,
           })
           .toFile(filePath),
@@ -96,11 +98,12 @@ export function registerImageUpload(apiInstance: FastifyInstance, dbManager: DbM
       shortId = nanoid(10);
       // eslint-disable-next-line no-await-in-loop
     } while ((await dbManager.imagesCollection.findOne({ shortId })) !== null);
+    const uploadedOn = new Date();
     await dbManager.imagesCollection.insertOne({
       shortId,
       boards,
       capturedOnDay: request.body.capturedOn,
-      uploadedOn: new Date(),
+      uploadedOn,
       folderId: folder._id,
       uploaderId: user._id,
       rawFile: {
@@ -114,6 +117,8 @@ export function registerImageUpload(apiInstance: FastifyInstance, dbManager: DbM
     });
     return {
       shortId,
+      capturedOn: request.body.capturedOn,
+      uploadedOn: uploadedOn.toISOString(),
     };
   });
 }

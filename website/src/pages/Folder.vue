@@ -114,11 +114,88 @@
         </div>
       </template>
     </q-list>
+    <q-card
+      bordered
+      flat
+      class="q-mx-lg q-mt-lg"
+    >
+      <q-item-label header>
+        {{ $t('images') }}
+      </q-item-label>
+      <template v-if="imageGroups === null">
+        <template
+          v-for="i in 2"
+          :key="i"
+        >
+          <q-separator />
+          <q-item>
+            <q-item-section>
+              <q-skeleton
+                type="text"
+                width="150px"
+              />
+            </q-item-section>
+            <q-item-section side>
+              <q-skeleton
+                type="circle"
+                size="24px"
+              />
+            </q-item-section>
+          </q-item>
+        </template>
+      </template>
+      <div
+        v-else-if="imageGroups.length === 0"
+        class="text-center q-py-lg"
+      >
+        <div class="text-subtitle1">
+          {{ $t('noImages') }}
+        </div>
+      </div>
+      <template
+        v-for="group in imageGroups"
+        v-else
+        :key="group.date"
+      >
+        <q-separator />
+        <q-expansion-item
+          class="q-pt-none"
+          :label="group.dateLabel"
+          default-opened
+        >
+          <div class="images q-pa-md">
+            <router-link
+              v-for="image in group.images"
+              :key="image.shortId"
+              v-ripple
+              class="image__link"
+              :to="image.to"
+            >
+              <q-card>
+                <q-img
+                  :src="image.src"
+                  :srcset="image.srcset"
+                  :ratio="16/9"
+                  fit="contain"
+                >
+                  <template #loading>
+                    <q-skeleton
+                      width="100%"
+                      height="100%"
+                    />
+                  </template>
+                </q-img>
+              </q-card>
+            </router-link>
+          </div>
+        </q-expansion-item>
+      </template>
+    </q-card>
     <q-page-sticky
       position="bottom-right"
       :offset="[14, 14]"
     >
-      <upload-button />
+      <upload-button @uploaded="onImageUploaded" />
     </q-page-sticky>
   </q-page>
 </template>
@@ -127,19 +204,40 @@
 import {
   computed, defineComponent, ref, watch,
 } from 'vue';
-import { getFolderAncestors, getFolderInfo } from 'src/api';
+import { getFolderAncestors, getFolderInfo, getImages } from 'src/api';
 import { useRoute } from 'vue-router';
-import { CreateFolderReply, FolderAncestorsReply, FolderInfoReply } from 'board-camera-api-schemas';
+import {
+  CreateFolderReply,
+  FolderAncestorsReply,
+  FolderInfoReply,
+  UploadImageReply,
+  Image,
+} from 'board-camera-api-schemas';
 import FolderItem from 'components/FolderItem.vue';
 import FolderSkeleton from 'components/FolderSkeleton.vue';
 import CreateFolderMenu from 'components/CreateFolderMenu.vue';
 import BreadcrumbDivider from 'components/BreadcrumbDivider.vue';
 import UploadButton from 'components/UploadButton.vue';
+import { useI18n } from 'vue-i18n';
+import { sortedBy, sortWithSecond } from 'src/utils';
 
 interface BreadcrumbItem {
   name: string;
   id: string;
   to?: string;
+}
+
+interface ImageItem {
+  shortId: string;
+  src: string;
+  srcset: string;
+  to: string;
+}
+
+interface ImageGroup {
+  images: ImageItem[];
+  date: string;
+  dateLabel: string
 }
 
 export default defineComponent({
@@ -152,34 +250,76 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
+    const i18n = useI18n();
+
     const ancestors = ref<FolderAncestorsReply | null>(null);
     const folderInfo = ref<FolderInfoReply | null>(null);
-    const fetchAncestors = async (folderId: string) => {
+    const images = ref<Image[] | null>(null);
+    const fetchAncestors = async(folderId: string) => {
       ancestors.value = await getFolderAncestors(folderId);
     };
-    const fetchInfo = async (folderId: string) => {
+    const fetchInfo = async(folderId: string) => {
       folderInfo.value = await getFolderInfo(folderId);
     };
-    watch(() => {
+    const fetchImages = async(folderId: string) => {
+      const reply = await getImages(folderId);
+      images.value = reply.images;
+    };
+
+    const folderId = computed(() => {
       let id = route.params.folderId as undefined | string | string[];
       if (typeof id === 'object') [id] = id;
       return id;
-    }, async (folderId) => {
-      if (folderId === undefined) {
+    });
+
+    watch(folderId, async(value) => {
+      if (value === undefined) {
         console.warn('folderId is undefined');
         return;
       }
       folderInfo.value = null;
+      images.value = null;
       await Promise.all([
-        fetchAncestors(folderId),
-        fetchInfo(folderId),
+        fetchAncestors(value),
+        fetchInfo(value),
       ]);
+      await fetchImages(value);
     }, {
       immediate: true,
     });
     return {
       folderInfo,
       ancestors,
+      images,
+      imageGroups: computed<ImageGroup[] | null>(() => {
+        const folderIdVal = folderId.value;
+        const imagesVal = images.value;
+        if (folderIdVal === undefined || imagesVal === null) return null;
+        const dates: Record<string, Image[]> = {};
+        imagesVal.forEach((image) => {
+          const dateItem = dates[image.capturedOn] ?? (dates[image.capturedOn] = []);
+          dateItem.push(image);
+        });
+        const items = Object.entries(dates).map(([dateString, dateImages]) => ({
+          date: dateString,
+          dateLabel: new Date(dateString).toLocaleDateString(i18n.locale.value, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            weekday: 'long',
+          }),
+          images: sortWithSecond(dateImages.map((image) => {
+            const imgBase = `/api/folders/${folderIdVal}/images/${image.shortId}`;
+            return [{
+              shortId: image.shortId,
+              src: `${imgBase}/small.webp`,
+              srcset: `${imgBase}/small.webp 1x, ${imgBase}/medium.webp 2x, ${imgBase}/large.webp 4x, ${imgBase}/full.webp`,
+              to: `/folders/${folderIdVal}/images/${image.shortId}`,
+            }, new Date(image.uploadedOn)];
+          })),
+        }));
+        return sortedBy(items, 'date', true);
+      }),
       breadcrumbs: computed<{
         items: BreadcrumbItem[],
         shared: boolean
@@ -203,6 +343,10 @@ export default defineComponent({
         if (folderInfo.value === null) return;
         folderInfo.value.subfolders.push(reply);
       },
+      onImageUploaded(reply: UploadImageReply) {
+        if (images.value === null) return;
+        images.value.push(reply);
+      },
     };
   },
 });
@@ -216,5 +360,18 @@ export default defineComponent({
 $headerHeight: 48px;
 .header, .breadcrumbs {
   height: $headerHeight;
+}
+
+.images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+  grid-auto-rows: auto;
+  grid-gap: 10px;
+
+  .image__link {
+    color: initial;
+    display: block;
+    position: relative;
+  }
 }
 </style>

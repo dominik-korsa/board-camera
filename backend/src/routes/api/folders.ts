@@ -224,6 +224,7 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
     }).map((image): Image => ({
       shortId: image.shortId,
       capturedOn: image.capturedOnDay,
+      uploadedOn: image.uploadedOn.toISOString(),
     })).toArray();
     return { images };
   });

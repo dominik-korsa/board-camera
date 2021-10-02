@@ -97,7 +97,11 @@ module.exports = {
     'no-console': ['warn', { allow: ["warn", "error"] }],
     'no-spaced-func': 'off',
     'func-call-spacing': 'off',
-    '@typescript-eslint/func-call-spacing': 'error'
+    '@typescript-eslint/func-call-spacing': 'error',
+    'space-before-function-paren': 'off',
+    '@typescript-eslint/space-before-function-paren': ['error', 'never'],
+    "no-redeclare": 'off',
+    '@typescript-eslint/no-redeclare': ['error']
   },
   settings: {
     'vue-i18n': {

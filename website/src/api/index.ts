@@ -1,7 +1,7 @@
 import ky from 'ky-universal';
 import {
   CreateFolderBody,
-  CreateFolderReply, FolderAncestorsReply, FolderInfoReply,
+  CreateFolderReply, FolderAncestorsReply, FolderImagesReply, FolderInfoReply,
   GetViewerReply,
   ListUserFoldersReply,
 } from 'board-camera-api-schemas';
@@ -30,4 +30,8 @@ export function getFolderAncestors(shortId: string) {
 
 export function getFolderInfo(shortId: string) {
   return ky.get(`/api/folders/${shortId}/info`).json<FolderInfoReply>();
+}
+
+export function getImages(shortId: string) {
+  return ky.get(`/api/folders/${shortId}/images`).json<FolderImagesReply>();
 }

@@ -11,16 +11,22 @@
       auto-upload
       field-name="file"
       :accept="['image/bmp', 'image/jpeg', 'image/png', 'image/webp'].join(', ')"
+      :headers="uploadHeaders"
       flat
       square
       :readonly="!capturedOnValid"
       @start="onUploadStart"
       @finish="onUploadFinish"
+      @uploaded="onFileUploaded"
     >
       <template #header="scope">
         <div class="row no-wrap items-center q-pa-sm q-gutter-xs">
+          <q-spinner
+            v-if="scope.isUploading"
+            class="q-uploader__spinner"
+          />
           <q-btn
-            v-if="scope.uploadedFiles.length > 0"
+            v-else-if="scope.uploadedFiles.length > 0"
             icon="done_all"
             round
             dense
@@ -29,10 +35,6 @@
           >
             <q-tooltip>{{ $t('uploadImages.removeUploaded') }}</q-tooltip>
           </q-btn>
-          <q-spinner
-            v-if="scope.isUploading"
-            class="q-uploader__spinner"
-          />
           <div class="col">
             <div class="q-uploader__title">
               {{ $t('uploadImages.title') }}
@@ -129,13 +131,19 @@ import {
   computed, ref, defineEmits, watch,
 } from 'vue';
 import { date } from 'quasar';
+import { UploadImageReply } from 'board-camera-api-schemas';
 
 const emit = defineEmits<{
   (e: 'close'): void,
   (e: 'isUploading', value: boolean): void,
+  (e: 'uploaded', reply: UploadImageReply): void,
 }>();
 
+const uploadHeaders: {name: string, value: string}[] = [
+  { name: 'accept', value: 'application/json' },
+];
 const dateFormat = 'YYYY-MM-DD';
+
 const capturedOn = ref(date.formatDate(new Date(), dateFormat));
 const capturedOnValid = computed(() => {
   const extractedDate = date.extractDate(capturedOn.value, 'YYYY-MM-DD');
@@ -147,6 +155,10 @@ watch(isUploading, (value) => {
 });
 const onUploadStart = () => { isUploading.value = true; };
 const onUploadFinish = () => { isUploading.value = false; };
+const onFileUploaded = (info: {xhr: XMLHttpRequest}) => {
+  const reply = JSON.parse(info.xhr.responseText) as UploadImageReply;
+  emit('uploaded', reply);
+};
 const onClose = () => {
   emit('close');
 };

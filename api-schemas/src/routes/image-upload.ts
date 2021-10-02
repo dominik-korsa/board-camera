@@ -1,4 +1,5 @@
 import { Static, Type } from '@sinclair/typebox';
+import { imageSchema } from './folders';
 
 export const uploadImageBodySchema = Type.Object({
   capturedOn: Type.String({
@@ -6,7 +7,5 @@ export const uploadImageBodySchema = Type.Object({
   }),
 });
 export type UploadImageBody = Static<typeof uploadImageBodySchema>;
-export const uploadImageReplySchema = Type.Object({
-  shortId: Type.String(),
-});
+export const uploadImageReplySchema = imageSchema;
 export type UploadImageReply = Static<typeof uploadImageReplySchema>;

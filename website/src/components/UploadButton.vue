@@ -19,6 +19,7 @@
   <upload-menu
     v-if="show && !useDialog"
     @close="show=false"
+    @uploaded="onUploaded"
   />
   <q-dialog
     v-if="useDialog"
@@ -28,15 +29,20 @@
     <upload-menu
       @close="show = false"
       @isUploading="onIsUploading"
+      @uploaded="onUploaded"
     />
   </q-dialog>
 </template>
 <script lang="ts" setup>
-import UploadMenu from 'components/UploadMenu';
-import { ref, watch } from 'vue';
+import UploadMenu from 'components/UploadMenu.vue';
+import { defineEmits, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
+import { UploadImageReply } from 'board-camera-api-schemas';
 
 const quasar = useQuasar();
+const emit = defineEmits<{
+  (e: 'uploaded', reply: UploadImageReply): void,
+}>();
 
 const show = ref(false);
 const useDialog = ref(false);
@@ -51,4 +57,7 @@ watch(() => {
 });
 const isUploading = ref(false);
 const onIsUploading = (value: boolean) => { isUploading.value = value; };
+const onUploaded = (reply: UploadImageReply) => {
+  emit('uploaded', reply);
+};
 </script>
