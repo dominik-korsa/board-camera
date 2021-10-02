@@ -9,6 +9,8 @@ import {
   Folder,
   FolderAncestorsReply,
   folderAncestorsReplySchema,
+  FolderImagesReply,
+  folderImagesReplySchema,
   FolderInfoReply, folderInfoReplySchema,
   FolderParams,
   folderParamsSchema,
@@ -185,16 +187,8 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
     const subfolders = await dbManager.foldersCollection.find({
       parentFolderId: folder._id,
     }).map(mapFolder).toArray();
-    // TODO: Extract images to another route
-    const images = await dbManager.imagesCollection.find({
-      folderId: folder._id,
-    }).map((image): Image => ({
-      shortId: image.shortId,
-      capturedOn: image.capturedOnDay,
-    })).toArray();
     return {
       subfolders,
-      images,
       name: folder.name,
       parentFolderShortId,
       viewer: {
@@ -202,6 +196,36 @@ export default function registerFolders(apiInstance: FastifyInstance, dbManager:
         role: folder.cache.userRecursiveRole[user.email],
       },
     };
+  });
+
+  apiInstance.get<{
+    Params: FolderParams,
+    Reply: FolderImagesReply,
+  }>('/folders/:folderShortId/images', {
+    schema: {
+      params: folderParamsSchema,
+      response: {
+        200: folderImagesReplySchema,
+      },
+      security: [
+        { apiTokenHeader: [] },
+        { sessionCookie: [] },
+      ],
+    },
+  }, async (request) => {
+    const user = await requireAuthentication(request, dbManager, true);
+    const folder = await dbManager.foldersCollection.findOne({
+      shortId: request.params.folderShortId,
+    });
+    if (!folder) throw apiInstance.httpErrors.notFound('Folder not found');
+    if (!hasRole(folder, user, 'viewer')) throw apiInstance.httpErrors.forbidden();
+    const images = await dbManager.imagesCollection.find({
+      folderId: folder._id,
+    }).map((image): Image => ({
+      shortId: image.shortId,
+      capturedOn: image.capturedOnDay,
+    })).toArray();
+    return { images };
   });
 
   apiInstance.patch<{

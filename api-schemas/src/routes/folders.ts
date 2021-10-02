@@ -23,16 +23,8 @@ export const listUserFoldersReplySchema = Type.Object({
 });
 export type ListUserFoldersReply = Static<typeof listUserFoldersReplySchema>;
 
-export const imageSchema = Type.Object({
-  shortId: Type.String(),
-  capturedOn: Type.String({
-    format: 'date',
-  }),
-});
-export type Image = Static<typeof imageSchema>;
 export const folderInfoReplySchema = Type.Object({
   subfolders: Type.Array(folderSchema),
-  images: Type.Array(imageSchema),
   name: Type.String(),
   parentFolderShortId: Type.Union([Type.String(), Type.Null()]),
   viewer: Type.Object({
@@ -41,6 +33,18 @@ export const folderInfoReplySchema = Type.Object({
   }),
 });
 export type FolderInfoReply = Static<typeof folderInfoReplySchema>;
+
+export const imageSchema = Type.Object({
+  shortId: Type.String(),
+  capturedOn: Type.String({
+    format: 'date',
+  }),
+});
+export type Image = Static<typeof imageSchema>;
+export const folderImagesReplySchema = Type.Object({
+  images: Type.Array(imageSchema),
+});
+export type FolderImagesReply = Static<typeof folderImagesReplySchema>;
 
 export const renameFolderBodySchema = Type.Object({
   name: folderNameSchema,
