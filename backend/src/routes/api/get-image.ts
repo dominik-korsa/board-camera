@@ -1,6 +1,5 @@
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import fse from 'fs-extra';
-import { Type } from '@sinclair/typebox';
 import { binarySchema, ImageParams, imageParamsSchema } from 'board-camera-api-schemas';
 import { requireAuthentication } from '../../guards';
 import { hasRole } from '../../rules';
@@ -34,9 +33,7 @@ export function registerImageDownload(apiInstance: FastifyInstance, dbManager: D
       ],
       produces: ['image/*'],
       response: {
-        200: Type.String({
-          format: 'binary',
-        }),
+        200: binarySchema,
       },
     },
   }, async (request, reply) => {

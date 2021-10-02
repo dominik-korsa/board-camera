@@ -114,12 +114,18 @@
         </div>
       </template>
     </q-list>
+    <q-page-sticky
+      position="bottom-right"
+      :offset="[14, 14]"
+    >
+      <upload-button />
+    </q-page-sticky>
   </q-page>
 </template>
 
 <script lang="ts">
 import {
-  computed, defineComponent, watch, ref,
+  computed, defineComponent, ref, watch,
 } from 'vue';
 import { getFolderAncestors, getFolderInfo } from 'src/api';
 import { useRoute } from 'vue-router';
@@ -128,6 +134,7 @@ import FolderItem from 'components/FolderItem.vue';
 import FolderSkeleton from 'components/FolderSkeleton.vue';
 import CreateFolderMenu from 'components/CreateFolderMenu.vue';
 import BreadcrumbDivider from 'components/BreadcrumbDivider.vue';
+import UploadButton from 'components/UploadButton.vue';
 
 interface BreadcrumbItem {
   name: string;
@@ -137,6 +144,7 @@ interface BreadcrumbItem {
 
 export default defineComponent({
   components: {
+    UploadButton,
     BreadcrumbDivider,
     FolderSkeleton,
     FolderItem,

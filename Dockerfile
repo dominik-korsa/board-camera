@@ -1,5 +1,18 @@
 # syntax=docker/dockerfile:1
-FROM node:16 AS prepare-schemas
+FROM node:16 AS libvips
+#RUN apt-get update
+#RUN apt-get install -y git build-essential automake libtool swig libxml2-dev libfftw3-dev \
+#   libmagickwand-dev libopenexr-dev liborc-0.4-0 gobject-introspection \
+#   libgsf-1-dev libglib2.0-dev liborc-0.4-dev gtk-doc-tools libopenslide-dev \
+#   libmatio-dev libgif-dev libwebp-dev libjpeg62-turbo-dev libexpat1-dev
+#WORKDIR /lib
+#RUN git clone https://github.com/libvips/libvips.git
+#WORKDIR /lib/libvips
+#RUN ./autogen.sh
+#RUN make
+#RUN make install
+
+FROM libvips AS prepare-schemas
 WORKDIR /api-schemas
 ADD api-schemas/package.json /tmp/api-schemas/
 RUN cd /tmp/api-schemas && npm install
@@ -10,7 +23,7 @@ RUN npm run build
 FROM prepare-schemas AS base
 WORKDIR /app
 ADD backend/package.json /tmp/backend/
-RUN cd /tmp/backend && npm install
+RUN cd /tmp/backend/ && npm install
 RUN mv /tmp/backend/node_modules /app
 
 COPY backend /app

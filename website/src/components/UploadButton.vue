@@ -1,0 +1,54 @@
+<template>
+  <q-btn
+    v-if="!show || useDialog"
+    fab
+    icon="mdi-upload"
+    color="primary"
+    class="q-ma-sm"
+    @click="show = true"
+  >
+    <q-tooltip
+      anchor="center left"
+      self="center right"
+      transition-show="jump-left"
+      transition-hide="jump-right"
+    >
+      {{ $t('uploadImages.title') }}
+    </q-tooltip>
+  </q-btn>
+  <upload-menu
+    v-if="show && !useDialog"
+    @close="show=false"
+  />
+  <q-dialog
+    v-if="useDialog"
+    v-model="show"
+    :persistent="isUploading"
+  >
+    <upload-menu
+      @close="show = false"
+      @isUploading="onIsUploading"
+    />
+  </q-dialog>
+</template>
+<script lang="ts" setup>
+import UploadMenu from 'components/UploadMenu';
+import { ref, watch } from 'vue';
+import { useQuasar } from 'quasar';
+
+const quasar = useQuasar();
+
+const show = ref(false);
+const useDialog = ref(false);
+watch(() => {
+  if (show.value) return null;
+  const target = quasar.screen.width < 500;
+  if (target === useDialog.value) return null;
+  return target;
+}, (value) => {
+  if (value === null) return;
+  useDialog.value = value;
+});
+const isUploading = ref(false);
+const onIsUploading = (value: boolean) => { isUploading.value = value; };
+</script>

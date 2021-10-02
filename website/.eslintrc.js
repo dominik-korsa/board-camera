@@ -94,6 +94,14 @@ module.exports = {
     // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-unused-vars': 'off',
-    'no-console': ['warn', { allow: ["warn", "error"] }]
+    'no-console': ['warn', { allow: ["warn", "error"] }],
+    'no-spaced-func': 'off',
+    'func-call-spacing': 'off',
+    '@typescript-eslint/func-call-spacing': 'error'
+  },
+  settings: {
+    'vue-i18n': {
+      localeDir: './src/i18n/**/*.{json,json5,yaml,yml}',
+    }
   }
 }

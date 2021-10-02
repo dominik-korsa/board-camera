@@ -28,7 +28,7 @@
             color="primary"
             outline
           >
-            Create folder
+            {{ $t('createFolder.title') }}
             <create-folder-menu @created="onCreated" />
           </q-btn>
         </div>

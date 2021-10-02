@@ -1,0 +1,35 @@
+{
+  "signIn": {
+    "google": "Sign in with Google"
+  },
+  "signOut": "Sign out",
+  "appName": "Board Camera",
+  "account": "Account",
+  "yourFolders": "Your folders",
+  "sharedFolders": "Shared folders",
+  "noFolders": "No folders",
+  "subfolders": "Subfolders",
+  "createFolder": {
+    "title": "Create folder",
+    "name": "Name",
+    "button": "Create",
+    "error": "Failed to create folder"
+  },
+  "createSubfolder": "Create subfolder",
+  "sharing": "Sharing",
+  "otherOptions": "Other options",
+  "uploadImages": {
+    "capturedOnInput": {
+      "label": "Photo capture day",
+      "hint": "Date format: YYYY-MM-DD",
+      "error": "Invalid date"
+    },
+    "title": "Upload images",
+    "subtitle": "{progress} / {size}",
+    "pickFiles": "Pick files",
+    "upload": "Upload files",
+    "close": "Close menu",
+    "removeUploaded": "Remove uploaded files"
+  },
+  "close": "Close"
+}
