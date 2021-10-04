@@ -36,6 +36,7 @@
           <q-avatar size="40px">
             <img
               :src="signedInUser.avatarUrl"
+              referrerpolicy="no-referrer"
               :alt="signedInUser.name"
             >
           </q-avatar>
