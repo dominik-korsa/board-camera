@@ -198,6 +198,11 @@
       <upload-button @uploaded="onImageUploaded" />
     </q-page-sticky>
   </q-page>
+  <image-dialog
+    :value="folderId && imageId"
+    :folder-id="folderId"
+    :image-id="imageId"
+  />
 </template>
 
 <script lang="ts">
@@ -220,6 +225,7 @@ import BreadcrumbDivider from 'components/BreadcrumbDivider.vue';
 import UploadButton from 'components/UploadButton.vue';
 import { useI18n } from 'vue-i18n';
 import { sortedBy, sortWithSecond } from 'src/utils';
+import ImageDialog from 'components/ImageDialog.vue';
 
 interface BreadcrumbItem {
   name: string;
@@ -242,6 +248,7 @@ interface ImageGroup {
 
 export default defineComponent({
   components: {
+    ImageDialog,
     UploadButton,
     BreadcrumbDivider,
     FolderSkeleton,
@@ -287,6 +294,13 @@ export default defineComponent({
     }, {
       immediate: true,
     });
+
+    const imageId = computed(() => {
+      let id = route.params.imageId as undefined | string | string[];
+      if (typeof id === 'object') [id] = id;
+      return id;
+    });
+
     return {
       folderInfo,
       ancestors,
@@ -347,6 +361,8 @@ export default defineComponent({
         if (images.value === null) return;
         images.value.push(reply);
       },
+      folderId,
+      imageId,
     };
   },
 });

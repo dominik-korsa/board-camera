@@ -13,6 +13,11 @@ const routes: RouteRecordRaw[] = [
         path: '/folders/:folderId',
         component: () => import('pages/Folder.vue'),
       },
+      {
+        path: '/folders/:folderId/images/:imageId',
+        name: 'folderImage',
+        component: () => import('pages/Folder.vue'),
+      },
     ],
   },
   {
