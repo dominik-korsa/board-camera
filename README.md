@@ -7,7 +7,7 @@ You can specify env variables in a `.env` file placed in the repo root
 ```dotenv
 BACKEND_PORT=5000
 BASE_URL=http://localhost:5000 # used for Google login redirect
-TRAEFIC_HOST=example.com
+TRAEFIK_HOST=example.com
 ```
 #### Additional files
 ##### `google-keys.json` - Google OAuth2.0 Client ID
