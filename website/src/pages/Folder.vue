@@ -255,13 +255,13 @@ export default defineComponent({
     const ancestors = ref<FolderAncestorsReply | null>(null);
     const folderInfo = ref<FolderInfoReply | null>(null);
     const images = ref<Image[] | null>(null);
-    const fetchAncestors = async(folderId: string) => {
+    const fetchAncestors = async (folderId: string) => {
       ancestors.value = await getFolderAncestors(folderId);
     };
-    const fetchInfo = async(folderId: string) => {
+    const fetchInfo = async (folderId: string) => {
       folderInfo.value = await getFolderInfo(folderId);
     };
-    const fetchImages = async(folderId: string) => {
+    const fetchImages = async (folderId: string) => {
       const reply = await getImages(folderId);
       images.value = reply.images;
     };
@@ -272,7 +272,7 @@ export default defineComponent({
       return id;
     });
 
-    watch(folderId, async(value) => {
+    watch(folderId, async (value) => {
       if (value === undefined) {
         console.warn('folderId is undefined');
         return;

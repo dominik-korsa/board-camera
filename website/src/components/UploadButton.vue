@@ -54,6 +54,8 @@ watch(() => {
 }, (value) => {
   if (value === null) return;
   useDialog.value = value;
+}, {
+  immediate: true,
 });
 const isUploading = ref(false);
 const onIsUploading = (value: boolean) => { isUploading.value = value; };
