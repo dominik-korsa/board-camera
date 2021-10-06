@@ -7,6 +7,7 @@ You can specify env variables in a `.env` file placed in the repo root
 ```dotenv
 BACKEND_PORT=5000
 BASE_URL=http://localhost:5000 # used for Google login redirect
+TRAEFIC_HOST=example.com
 ```
 #### Additional files
 ##### `google-keys.json` - Google OAuth2.0 Client ID
@@ -35,6 +36,11 @@ Your local Quasar development server (running on port 5002) will be proxied by t
 ### Production
 ```shell
 docker compose -f ./docker-compose.yml -f ./docker-compose.production.yml up --build
+```
+
+### Production with Traefik
+```shell
+docker compose -f ./docker-compose.yml -f ./docker-compose.production.yml -f ./docker-compose.traefik.yml up --build
 ```
 
 ## Docs
