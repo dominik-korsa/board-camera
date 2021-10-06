@@ -70,6 +70,20 @@
           dense
           class="q-ml-xs"
         >
+          <q-menu>
+            <q-item clickable>
+              <q-item-section side>
+                <q-icon name="mdi-pencil" />
+              </q-item-section>
+              <q-item-section>
+                {{ $t('renameFolder.title') }}
+              </q-item-section>
+              <rename-folder-menu
+                :folder-id="folderId"
+                @renamed="onFolderRenamed"
+              />
+            </q-item>
+          </q-menu>
           <q-tooltip class="text-no-wrap">
             {{ $t('otherOptions') }}
           </q-tooltip>
@@ -226,6 +240,7 @@ import UploadButton from 'components/UploadButton.vue';
 import { useI18n } from 'vue-i18n';
 import { sortedBy, sortWithSecond } from 'src/utils';
 import ImageDialog from 'components/ImageDialog.vue';
+import RenameFolderMenu from 'components/RenameFolderMenu.vue';
 
 interface BreadcrumbItem {
   name: string;
@@ -248,6 +263,7 @@ interface ImageGroup {
 
 export default defineComponent({
   components: {
+    RenameFolderMenu,
     ImageDialog,
     UploadButton,
     BreadcrumbDivider,
@@ -300,7 +316,6 @@ export default defineComponent({
       if (typeof id === 'object') [id] = id;
       return id;
     });
-
     return {
       folderInfo,
       ancestors,
@@ -360,6 +375,10 @@ export default defineComponent({
       onImageUploaded(reply: UploadImageReply) {
         if (images.value === null) return;
         images.value.push(reply);
+      },
+      onFolderRenamed(name: string) {
+        if (folderInfo.value !== null) folderInfo.value.name = name;
+        if (ancestors.value !== null) ancestors.value.self.name = name;
       },
       folderId,
       imageId,

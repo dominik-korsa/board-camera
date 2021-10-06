@@ -3,7 +3,7 @@ import {
   CreateFolderBody,
   CreateFolderReply, FolderAncestorsReply, FolderImagesReply, FolderInfoReply,
   GetViewerReply,
-  ListUserFoldersReply,
+  ListUserFoldersReply, RenameFolderBody,
 } from 'board-camera-api-schemas';
 
 export function getUserInfo() {
@@ -34,4 +34,9 @@ export function getFolderInfo(shortId: string) {
 
 export function getImages(shortId: string) {
   return ky.get(`/api/folders/${shortId}/images`).json<FolderImagesReply>();
+}
+
+export async function renameFolder(name: string, folderId: string) {
+  const body: RenameFolderBody = { name };
+  await ky.patch(`/api/folders/${folderId}/rename`, { json: body });
 }

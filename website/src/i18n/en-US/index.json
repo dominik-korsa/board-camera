@@ -9,11 +9,16 @@
   "sharedFolders": "Shared folders",
   "noFolders": "No folders",
   "subfolders": "Subfolders",
+  "folderFormName": "Name",
   "createFolder": {
     "title": "Create folder",
-    "name": "Name",
     "button": "Create",
     "error": "Failed to create folder"
+  },
+  "renameFolder": {
+    "title": "Rename folder",
+    "button": "Rename",
+    "error": "Failed to rename folder"
   },
   "createSubfolder": "Create subfolder",
   "sharing": "Sharing",
