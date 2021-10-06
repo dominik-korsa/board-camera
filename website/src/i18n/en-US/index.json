@@ -33,5 +33,6 @@
   },
   "close": "Close",
   "images": "Images",
-  "noImages": "No images"
+  "noImages": "No images",
+  "imageAlt": "Board image"
 }

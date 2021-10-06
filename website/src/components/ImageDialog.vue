@@ -10,21 +10,27 @@
       dark
       class="full-height"
     >
-      <q-img
-        :src="imageSrc"
-        class="full-height full-width"
-        fit="contain"
-        loading="lazy"
-      >
-        <div class="buttons">
-          <q-btn
-            flat
-            round
-            icon="mdi-arrow-left"
-            @click="onHide"
-          />
-        </div>
-      </q-img>
+      <div class="image-contain full-width full-height">
+        <img
+          :src="imageSrc"
+          loading="lazy"
+          :alt="$t('imageAlt')"
+        >
+      </div>
+      <div class="top-buttons q-pa-md row">
+        <q-btn
+          flat
+          round
+          icon="mdi-arrow-left"
+          @click="onHide"
+        />
+        <q-space />
+        <q-btn
+          flat
+          round
+          icon="mdi-information"
+        />
+      </div>
     </q-card>
   </q-dialog>
 </template>
@@ -58,7 +64,7 @@ watch(
     if (folderId === undefined || imageId === undefined) {
       image.value = null;
     } else {
-      imageSrc.value = `/api/folders/${folderId}/images/${imageId}/full.webp`;
+      imageSrc.value = `/api/folders/${folderId}/images/${imageId}/large.webp`;
     }
   }, {
     immediate: true,
@@ -73,7 +79,10 @@ async function onHide() {
 </script>
 
 <style lang="scss" scoped>
-.buttons {
-  background: none;
+.top-buttons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
 }
 </style>
