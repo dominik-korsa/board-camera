@@ -1,6 +1,7 @@
 services:
   backend:
     labels:
+      - traefik.enable=true
       - traefik.http.routers.board-camera-http.rule=Host(`${TRAEFIK_HOST}`)
       - traefik.http.routers.board-camera-http.entrypoints=http
       - traefik.http.routers.board-camera-http.middlewares=redirect
