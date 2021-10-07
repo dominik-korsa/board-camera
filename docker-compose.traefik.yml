@@ -2,7 +2,6 @@ services:
   backend:
     networks:
       - traefik
-      - board-camera_default
     labels:
       - traefik.enable=true
       - traefik.http.routers.board-camera-http.rule=Host(`${TRAEFIK_HOST}`)
