@@ -16,6 +16,18 @@
       <q-card-actions>
         <q-btn
           type="a"
+          href="/api-tokens"
+          flat
+          class="full-width"
+          color="primary"
+        >
+          {{ $t('manageApiTokens') }}
+        </q-btn>
+      </q-card-actions>
+      <q-separator />
+      <q-card-actions>
+        <q-btn
+          type="a"
           href="/auth/sign-out"
           flat
           class="full-width"

@@ -39,5 +39,26 @@
   "close": "Close",
   "images": "Images",
   "noImages": "No images",
-  "imageAlt": "Board image"
+  "imageAlt": "Board image",
+  "manageApiTokens": "Manage API tokens",
+  "generateApiToken": {
+    "title": "Generate new API token",
+    "name": "Token name",
+    "generate": "Generate",
+    "error": "Failed to generate the API token"
+  },
+  "noApiTokens": "You have no API tokens",
+  "revokeToken": {
+    "button": "Revoke token",
+    "confirm": {
+      "title": "Confirm",
+      "message": "Do you want to revoke this token?",
+      "ok": "Revoke"
+    },
+    "error": "Failed to revoke token"
+  },
+  "clipboardCopy": "Copy to clipboard",
+  "copyFailed": "Failed to copy to clipboard",
+  "copySuccess": "Copied to clipboard",
+  "tokenNotice": "Make sure to copy this token now. You won’t be able to see it again!"
 }

@@ -1,12 +1,17 @@
 import { FastifyInstance } from 'fastify';
 import { nanoid } from 'nanoid';
 import bcrypt from 'bcrypt';
-import { Static, Type } from '@sinclair/typebox';
 import {
-  EmptyReply, emptyReplySchema,
-  GenerateTokenBody, generateTokenBodySchema, GenerateTokenReply, generateTokenReplySchema,
+  EmptyReply,
+  emptyReplySchema,
+  GenerateTokenBody,
+  generateTokenBodySchema,
+  GenerateTokenReply,
+  generateTokenReplySchema,
+  ListTokensReply,
   listTokensReplySchema,
-  ListTokensReplySchema,
+  RevokeTokenBody,
+  revokeTokenBodySchema,
 } from 'board-camera-api-schemas';
 import { DbManager } from '../../database/database';
 import { requireAuthentication } from '../../guards';
@@ -37,14 +42,20 @@ export function registerAPITokens(apiInstance: FastifyInstance, dbManager: DbMan
       const keySecret = nanoid(15);
       const token = `${tokenId}:${keySecret}`;
       const hash = await bcrypt.hash(token, 8);
+      const createdOn = new Date();
       await dbManager.apiTokensCollection.insertOne({
         tokenId,
         tokenHash: hash,
         ownerId: user._id,
-        createdOn: new Date(),
+        createdOn,
         name: request.body.name,
       });
-      return { token };
+      return {
+        tokenId,
+        token,
+        name: request.body.name,
+        createdOn: createdOn.toISOString(),
+      };
     } catch (error) {
       apiInstance.log.error(error);
       throw apiInstance.httpErrors.internalServerError();
@@ -52,7 +63,7 @@ export function registerAPITokens(apiInstance: FastifyInstance, dbManager: DbMan
   });
 
   apiInstance.get<{
-    Reply: ListTokensReplySchema,
+    Reply: ListTokensReply,
   }>('/api-tokens/list', {
     schema: {
       response: {
@@ -77,21 +88,6 @@ export function registerAPITokens(apiInstance: FastifyInstance, dbManager: DbMan
     };
   });
 
-  const revokeTokenBodySchema = Type.Union([
-    Type.Object({
-      type: Type.Literal('id'),
-      value: Type.String({
-        pattern: '^[A-Za-z0-9_-]+$',
-      }),
-    }),
-    Type.Object({
-      type: Type.Literal('token'),
-      value: Type.String({
-        pattern: '^[A-Za-z0-9_-]+:[A-Za-z0-9_-]+$',
-      }),
-    }),
-  ]);
-  type RevokeTokenBody = Static<typeof revokeTokenBodySchema>;
   apiInstance.post<{
     Body: RevokeTokenBody,
     Reply: EmptyReply,

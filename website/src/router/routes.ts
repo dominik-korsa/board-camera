@@ -18,6 +18,10 @@ const routes: RouteRecordRaw[] = [
         name: 'folderImage',
         component: () => import('pages/Folder.vue'),
       },
+      {
+        path: '/api-tokens',
+        component: () => import('pages/ApiTokens.vue'),
+      },
     ],
   },
   {

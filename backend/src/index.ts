@@ -15,8 +15,8 @@ async function main() {
     logger: true,
     constraints: {
       website: getProxyConstraint('website', [
-        '/api',
-        '/auth',
+        '/api/',
+        '/auth/',
       ]),
     },
   });
