@@ -1,7 +1,8 @@
 services:
   backend:
     networks:
-      - traefik
+      - traefik-proxy
+      - default
     labels:
       - traefik.enable=true
       - traefik.http.routers.board-camera-http.rule=Host(`${TRAEFIK_HOST}`)
@@ -14,6 +15,6 @@ services:
       - traefik.http.services.backend.loadbalancer.server.port=80
       - traefik.http.middlewares.redirect.redirectscheme.scheme=https
 networks:
-  traefik:
+  traefik-proxy:
     external: true
-    name: traefik
+    name: traefik-proxy
