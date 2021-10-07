@@ -15,14 +15,20 @@ services:
     depends_on:
       - mongodb
       - transformer
+    networks:
+      - board-camera
   mongodb:
     image: mongo
     volumes:
       - db:/data/db
     restart: on-failure
+    networks:
+      - board-camera
   transformer:
     build: transformer
     restart: on-failure
+    networks:
+      - board-camera
 secrets:
   session-key:
     file: session-key
@@ -31,3 +37,5 @@ secrets:
 volumes:
   db:
   images:
+networks:
+  board-camera:

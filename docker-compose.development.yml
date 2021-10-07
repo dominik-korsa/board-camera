@@ -6,6 +6,8 @@ services:
       PORTS: 80:5002
     restart: on-failure
     mem_limit: 8M
+    networks:
+      - board-camera
   backend:
     build:
       target: development
