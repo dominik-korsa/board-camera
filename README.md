@@ -1,4 +1,4 @@
-# Greatest
+# Board Camera
 
 ## Starting
 ### Configuration
